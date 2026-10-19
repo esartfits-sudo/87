@@ -72,6 +72,7 @@
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
+    cursor: pointer;
   }
 
   #bgImage {
@@ -95,8 +96,39 @@
     filter: drop-shadow(0 2px 6px rgba(6, 52, 94, 0.25));
   }
 
-  #logo:active {
-    cursor: grabbing;
+  #logo:active { cursor: grabbing; }
+
+  /* Floating preview button on stage */
+  .stage-float-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(10, 77, 140, 0.9);
+    color: white;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    transition: transform 0.12s, background 0.15s;
+    z-index: 5;
+    padding: 0;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .stage-float-btn:active {
+    transform: scale(0.9);
+    background: rgba(10, 77, 140, 1);
+  }
+
+  .stage-float-btn svg {
+    width: 18px;
+    height: 18px;
   }
 
   #emptyState {
@@ -118,15 +150,8 @@
     opacity: 0.6;
   }
 
-  #emptyState p {
-    font-size: 14px;
-    opacity: 0.8;
-  }
-
-  #emptyState small {
-    font-size: 11px;
-    opacity: 0.6;
-  }
+  #emptyState p { font-size: 14px; opacity: 0.8; }
+  #emptyState small { font-size: 11px; opacity: 0.6; }
 
   .controls {
     background: var(--white);
@@ -157,15 +182,9 @@
     white-space: nowrap;
   }
 
-  .btn:active {
-    transform: scale(0.96);
-  }
+  .btn:active { transform: scale(0.96); }
 
-  .btn svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-  }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
   .btn-primary {
     background: linear-gradient(135deg, var(--blue), var(--blue-light));
@@ -185,9 +204,7 @@
     transform: none;
   }
 
-  .btn[hidden] {
-    display: none !important;
-  }
+  .btn[hidden] { display: none !important; }
 
   .size-control {
     display: flex;
@@ -299,11 +316,7 @@
     box-shadow: 0 2px 6px rgba(10, 77, 140, 0.35);
   }
 
-  .segmented button small {
-    font-size: 9px;
-    opacity: 0.85;
-    font-weight: 500;
-  }
+  .segmented button small { font-size: 9px; opacity: 0.85; font-weight: 500; }
 
   .filename-control {
     display: flex;
@@ -339,9 +352,7 @@
     min-width: 0;
   }
 
-  .filename-input-wrap:focus-within {
-    border-color: var(--blue);
-  }
+  .filename-input-wrap:focus-within { border-color: var(--blue); }
 
   .filename-input-wrap input {
     flex: 1;
@@ -359,10 +370,7 @@
     min-width: 0;
   }
 
-  .filename-input-wrap input::placeholder {
-    color: #a0b0c0;
-    font-weight: 500;
-  }
+  .filename-input-wrap input::placeholder { color: #a0b0c0; font-weight: 500; }
 
   .ext-badge {
     font-size: 12px;
@@ -432,9 +440,7 @@
     gap: 4px;
   }
 
-  .info-bar b {
-    font-weight: 700;
-  }
+  .info-bar b { font-weight: 700; }
 
   .hidden-input {
     position: absolute;
@@ -458,16 +464,13 @@
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
-    z-index: 100;
+    z-index: 500;
     box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     max-width: 90vw;
     text-align: center;
   }
 
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   #loading {
     position: fixed;
@@ -478,16 +481,14 @@
     justify-content: center;
     flex-direction: column;
     gap: 16px;
-    z-index: 200;
+    z-index: 600;
     color: var(--white);
     font-weight: 600;
     padding: 20px;
     text-align: center;
   }
 
-  #loading.show {
-    display: flex;
-  }
+  #loading.show { display: flex; }
 
   .spinner {
     width: 44px;
@@ -498,8 +499,401 @@
     animation: spin 0.8s linear infinite;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Size modal ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 52, 94, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-card {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(6, 52, 94, 0.5);
+    animation: modalIn 0.25s ease-out;
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    gap: 10px;
+  }
+
+  .modal-header h2 {
+    font-size: 17px;
+    color: var(--blue-dark);
+    font-weight: 800;
+  }
+
+  .modal-close {
+    background: rgba(10, 77, 140, 0.08);
+    border: none;
+    font-size: 16px;
+    color: var(--blue);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+
+  .modal-close:active { background: rgba(10, 77, 140, 0.2); }
+
+  .modal-subtitle {
+    font-size: 12px;
+    color: var(--blue);
+    opacity: 0.75;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .size-inputs-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .size-input-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .size-input-box label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .input-with-unit {
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 0 10px 0 0;
+    transition: border-color 0.15s;
+  }
+
+  .input-with-unit:focus-within { border-color: var(--blue); }
+
+  .input-with-unit input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 11px 10px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--blue-dark);
+    outline: none;
+    min-width: 0;
+    direction: ltr;
+    text-align: center;
+  }
+
+  .input-with-unit input::-webkit-outer-spin-button,
+  .input-with-unit input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .input-with-unit input[type=number] { -moz-appearance: textfield; }
+
+  .input-with-unit span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    opacity: 0.7;
+  }
+
+  .aspect-lock-row { margin-bottom: 12px; }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--blue-dark);
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg);
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .toggle-label input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .size-preview-box {
+    background: linear-gradient(135deg, #e8f0f9, #f0f4f8);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--blue);
+    gap: 8px;
+  }
+
+  .preview-row b {
+    font-size: 13px;
+    color: var(--blue-dark);
+    font-weight: 800;
+    direction: ltr;
+    text-align: right;
+  }
+
+  .preview-warning {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .preview-warning[hidden] { display: none; }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.12s, opacity 0.12s;
+    white-space: nowrap;
+  }
+
+  .modal-btn:active { transform: scale(0.96); }
+
+  .modal-btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: white;
+    box-shadow: 0 3px 10px rgba(10, 77, 140, 0.3);
+    flex: 1.3;
+  }
+
+  .modal-btn-secondary {
+    background: var(--bg);
+    color: var(--blue);
+  }
+
+  .modal-btn-ghost {
+    background: transparent;
+    color: var(--blue);
+    border: 2px solid rgba(10, 77, 140, 0.15);
+    flex: 0.9;
+  }
+
+  .modal-btn[hidden] { display: none !important; }
+  .modal-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ===== Fullscreen preview ===== */
+  .preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: #16191f;
+    z-index: 400;
+    display: none;
+    flex-direction: column;
+    overscroll-behavior: none;
+  }
+
+  .preview-overlay.show {
+    display: flex;
+    animation: previewFadeIn 0.2s ease-out;
+  }
+
+  @keyframes previewFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .preview-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0));
+    z-index: 10;
+    color: white;
+    pointer-events: none;
+    flex-wrap: wrap;
+  }
+
+  .preview-toolbar > * { pointer-events: auto; }
+
+  .preview-info {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(0,0,0,0.5);
+    padding: 7px 11px;
+    border-radius: 8px;
+    direction: ltr;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: #e8f0f9;
+    border: 1px solid rgba(255,255,255,0.15);
+    line-height: 1.4;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-right: auto;
+  }
+
+  .preview-actions button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+    padding: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .preview-actions button:active {
+    background: rgba(255,255,255,0.3);
+    transform: scale(0.92);
+  }
+
+  .preview-actions button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  #previewZoomLevel {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 52px;
+    text-align: center;
+    direction: ltr;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  .preview-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    background: #16191f;
+  }
+
+  .preview-canvas-wrap:active { cursor: grabbing; }
+
+  .preview-canvas-wrap > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    max-height: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+    transform-origin: 0 0;
+    will-change: transform;
+    image-rendering: -webkit-optimize-contrast;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+
+  .preview-hint {
+    position: absolute;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    color: rgba(255,255,255,0.85);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 10;
+    pointer-events: none;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.1);
+    animation: hintFadeOut 4s ease-in-out forwards;
+  }
+
+  @keyframes hintFadeOut {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
   }
 </style>
 </head>
@@ -514,6 +908,13 @@
     <div id="stage">
       <img id="bgImage" alt="الصورة" style="display:none;">
       <img id="logo" alt="اللوجو" style="display:none;">
+      <button class="stage-float-btn" id="stagePreviewBtn" hidden title="معاينة كاملة" aria-label="معاينة كاملة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+      </button>
       <div id="emptyState">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -573,14 +974,31 @@
       <span class="size-value" id="jpegQualityValue">95%</span>
     </div>
 
+    <button class="btn btn-outline" id="openSizeBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 3v18"/>
+      </svg>
+      <span id="openSizeBtnText">تخصيص المقاس بالسنتيمتر</span>
+    </button>
+
+    <button class="btn btn-outline" id="previewBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.35-4.35"/>
+        <path d="M11 8v6M8 11h6"/>
+      </svg>
+      معاينة كاملة (Review)
+    </button>
+
     <div class="filename-control">
       <div class="filename-row">
         <label for="filenameInput">اسم الملف</label>
         <div class="filename-input-wrap">
-          <input type="text" id="filenameInput" value="image-with-logo" maxlength="80" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
+          <input type="text" id="filenameInput" value="" maxlength="80" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
           <span class="ext-badge" id="extBadge">.png</span>
         </div>
-        <button type="button" class="filename-reset" id="filenameReset" title="استرجاع الاسم الافتراضي" aria-label="استرجاع الاسم الافتراضي">↺</button>
+        <button type="button" class="filename-reset" id="filenameReset" title="مسح الاسم" aria-label="مسح الاسم">↺</button>
       </div>
       <div class="filename-preview" id="filenamePreview">سيتم التنزيل باسم: <b>image-with-logo.png</b></div>
     </div>
@@ -608,6 +1026,74 @@
 <div id="loading">
   <div class="spinner"></div>
   <span id="loadingText">جاري تجهيز الصورة...</span>
+</div>
+
+<!-- ===== Size modal ===== -->
+<div id="sizeModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>📏 مقاس الصورة</h2>
+      <button class="modal-close" id="closeSizeBtn" aria-label="إغلاق">✕</button>
+    </div>
+    <p class="modal-subtitle">اكتب المقاس اللي عايز تطبع/تحفظ بيه الصورة بالسنتيمتر</p>
+
+    <div class="size-inputs-row">
+      <div class="size-input-box">
+        <label>العرض</label>
+        <div class="input-with-unit">
+          <input type="number" id="widthCm" min="1" max="200" step="0.1" inputmode="decimal">
+          <span>سم</span>
+        </div>
+      </div>
+      <div class="size-input-box">
+        <label>الطول</label>
+        <div class="input-with-unit">
+          <input type="number" id="heightCm" min="1" max="200" step="0.1" inputmode="decimal">
+          <span>سم</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="aspect-lock-row">
+      <label class="toggle-label">
+        <input type="checkbox" id="aspectLock" checked>
+        <span>🔒 الحفاظ على نسبة الصورة الأصلية</span>
+      </label>
+    </div>
+
+    <div class="size-preview-box">
+      <div class="preview-row">
+        <span>الأبعاد النهائية بالبكسل:</span>
+        <b id="pixelPreview">0 × 0</b>
+      </div>
+      <div class="preview-row">
+        <span>كثافة البكسل:</span>
+        <b id="dpiPreview">300 DPI</b>
+      </div>
+      <div class="preview-warning" id="sizeWarning" hidden></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-ghost" id="resetSizeBtn" hidden>مسح</button>
+      <button class="modal-btn modal-btn-secondary" id="cancelSizeBtn">إلغاء</button>
+      <button class="modal-btn modal-btn-primary" id="applySizeBtn">✓ تطبيق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Fullscreen preview ===== -->
+<div id="previewModal" class="preview-overlay" aria-hidden="true">
+  <div class="preview-toolbar">
+    <div class="preview-info" id="previewInfo">0 × 0 px</div>
+    <div class="preview-actions">
+      <button id="previewZoomOut" title="تصغير" aria-label="تصغير">−</button>
+      <span id="previewZoomLevel">100%</span>
+      <button id="previewZoomIn" title="تكبير" aria-label="تكبير">+</button>
+      <button id="previewReset" title="إعادة الضبط" aria-label="إعادة الضبط">↺</button>
+      <button id="previewClose" title="إغلاق" aria-label="إغلاق">✕</button>
+    </div>
+  </div>
+  <div class="preview-canvas-wrap" id="previewCanvasWrap"></div>
 </div>
 
 <script>
@@ -644,7 +1130,40 @@
   const loadingText = document.getElementById('loadingText');
   const canvasArea = document.getElementById('canvasArea');
 
+  const openSizeBtn = document.getElementById('openSizeBtn');
+  const openSizeBtnText = document.getElementById('openSizeBtnText');
+  const previewBtn = document.getElementById('previewBtn');
+  const stagePreviewBtn = document.getElementById('stagePreviewBtn');
+
+  // Size modal
+  const sizeModal = document.getElementById('sizeModal');
+  const widthCmInput = document.getElementById('widthCm');
+  const heightCmInput = document.getElementById('heightCm');
+  const aspectLock = document.getElementById('aspectLock');
+  const pixelPreview = document.getElementById('pixelPreview');
+  const dpiPreview = document.getElementById('dpiPreview');
+  const sizeWarning = document.getElementById('sizeWarning');
+  const applySizeBtn = document.getElementById('applySizeBtn');
+  const cancelSizeBtn = document.getElementById('cancelSizeBtn');
+  const closeSizeBtn = document.getElementById('closeSizeBtn');
+  const resetSizeBtn = document.getElementById('resetSizeBtn');
+
+  // Preview modal
+  const previewModal = document.getElementById('previewModal');
+  const previewCanvasWrap = document.getElementById('previewCanvasWrap');
+  const previewInfo = document.getElementById('previewInfo');
+  const previewZoomLevel = document.getElementById('previewZoomLevel');
+  const previewZoomIn = document.getElementById('previewZoomIn');
+  const previewZoomOut = document.getElementById('previewZoomOut');
+  const previewReset = document.getElementById('previewReset');
+  const previewClose = document.getElementById('previewClose');
+
   const DEFAULT_FILENAME = 'image-with-logo';
+  const BASE_DPI = 150;
+  const DPI_BY_QUALITY = { 1: 150, 2: 300, 3: 450 };
+  const MAX_DIM = 16000;
+  const MAX_PIXELS = 100000000;
+  const MAX_PREVIEW_DIM = 2400;
 
   const state = {
     bgNatural: { w: 0, h: 0 },
@@ -656,6 +1175,21 @@
     jpegQuality: 0.95,
     bgReady: false,
     logoReady: false,
+    customSizeCm: null,
+  };
+
+  // Preview state
+  const previewState = {
+    isOpen: false,
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    fitScale: 1,
+    minScale: 0.05,
+    maxScale: 10,
+    imgEl: null,
+    imgW: 0,
+    imgH: 0,
   };
 
   let toastTimer;
@@ -667,7 +1201,25 @@
   }
 
   function maybeEnableDownload() {
-    downloadBtn.disabled = !(state.bgReady && state.logoReady);
+    const ready = state.bgReady && state.logoReady;
+    downloadBtn.disabled = !ready;
+    previewBtn.disabled = !ready;
+    stagePreviewBtn.hidden = !ready;
+  }
+
+  function getCurrentDPI() {
+    return DPI_BY_QUALITY[state.qualityMult] || BASE_DPI;
+  }
+
+  function getDefaultCm() {
+    return {
+      width: state.bgNatural.w / BASE_DPI * 2.54,
+      height: state.bgNatural.h / BASE_DPI * 2.54,
+    };
+  }
+
+  function cmToPixels(cm) {
+    return Math.round(cm / 2.54 * getCurrentDPI());
   }
 
   // ===== Filename helpers =====
@@ -689,13 +1241,12 @@
     const ext = getExtension();
     extBadge.textContent = '.' + ext;
     const cleanName = sanitizeFilename(filenameInput.value);
-    const finalName = cleanName + '.' + ext;
-    filenamePreview.innerHTML = 'سيتم التنزيل باسم: <b>' + finalName + '</b>';
+    filenamePreview.innerHTML = 'سيتم التنزيل باسم: <b>' + cleanName + '.' + ext + '</b>';
   }
 
   filenameInput.addEventListener('input', updateFilenameUI);
   filenameReset.addEventListener('click', () => {
-    filenameInput.value = DEFAULT_FILENAME;
+    filenameInput.value = '';
     updateFilenameUI();
     filenameInput.focus();
   });
@@ -772,6 +1323,7 @@
       bgImage.style.display = 'block';
       emptyState.style.display = 'none';
       state.bgReady = true;
+      state.customSizeCm = null;
       fitStageToViewport();
       updateInfo();
       applyTransforms();
@@ -789,11 +1341,9 @@
 
   function fitStageToViewport() {
     if (!state.bgReady) return;
-
     const areaRect = canvasArea.getBoundingClientRect();
     const availW = areaRect.width - 20;
     const availH = areaRect.height - 20;
-
     const bgRatio = state.bgNatural.w / state.bgNatural.h;
     let dispW = availW;
     let dispH = dispW / bgRatio;
@@ -803,28 +1353,22 @@
     }
     dispW = Math.max(1, Math.floor(dispW));
     dispH = Math.max(1, Math.floor(dispH));
-
     stage.style.width = dispW + 'px';
     stage.style.height = dispH + 'px';
     bgImage.style.width = '100%';
     bgImage.style.height = '100%';
-
     applyTransforms();
   }
 
   function applyTransforms() {
     if (!state.bgReady || !state.logoReady) return;
-
     const stageW = stage.clientWidth;
     const stageH = stage.clientHeight;
     if (stageW === 0 || stageH === 0) return;
-
     const targetW = stageW * (state.logoScalePct / 100);
     const targetH = targetW * (state.logoNatural.h / state.logoNatural.w);
-
     logo.style.width = targetW + 'px';
     logo.style.height = targetH + 'px';
-
     const maxX = Math.max(0, stageW - targetW);
     const maxY = Math.max(0, stageH - targetH);
     let px = state.logoPos.x * stageW;
@@ -833,7 +1377,6 @@
     py = Math.min(Math.max(0, py), maxY);
     state.logoPos.x = stageW > 0 ? px / stageW : 0;
     state.logoPos.y = stageH > 0 ? py / stageH : 0;
-
     logo.style.left = px + 'px';
     logo.style.top = py + 'px';
   }
@@ -894,25 +1437,516 @@
       infoBar.style.display = 'none';
       return;
     }
-    const w = state.bgNatural.w * state.qualityMult;
-    const h = state.bgNatural.h * state.qualityMult;
-    infoDim.textContent = w + ' × ' + h;
-
-    if (state.qualityMult === 1) {
-      infoQuality.textContent = '🎯 دقة أصلية';
-    } else if (state.qualityMult === 2) {
-      infoQuality.textContent = '🎯 ×2 + حِدّة';
+    let w, h, qualityText;
+    if (state.customSizeCm) {
+      w = cmToPixels(state.customSizeCm.width);
+      h = cmToPixels(state.customSizeCm.height);
+      qualityText = '📏 ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم';
     } else {
-      infoQuality.textContent = '🎯 ×3 + حِدّة';
+      w = state.bgNatural.w * state.qualityMult;
+      h = state.bgNatural.h * state.qualityMult;
+      qualityText = state.qualityMult === 1
+        ? '🎯 دقة أصلية'
+        : (state.qualityMult === 2 ? '🎯 ×2 + حِدّة' : '🎯 ×3 + حِدّة');
     }
+    infoDim.textContent = w + ' × ' + h;
+    infoQuality.textContent = qualityText;
     infoFormat.textContent = '📄 ' + state.format.toUpperCase();
     infoBar.style.display = 'flex';
+    if (state.customSizeCm) {
+      openSizeBtnText.textContent = '📏 المقاس: ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم';
+    } else {
+      openSizeBtnText.textContent = 'تخصيص المقاس بالسنتيمتر';
+    }
   }
+
+  // ===== Size modal logic =====
+  function isDefaultSize(wCm, hCm) {
+    const def = getDefaultCm();
+    return Math.abs(wCm - def.width) < 0.1 && Math.abs(hCm - def.height) < 0.1;
+  }
+
+  function updateSizePreview() {
+    const wCm = parseFloat(widthCmInput.value) || 0;
+    const hCm = parseFloat(heightCmInput.value) || 0;
+    const dpi = getCurrentDPI();
+    const wPx = Math.round(wCm / 2.54 * dpi);
+    const hPx = Math.round(hCm / 2.54 * dpi);
+    pixelPreview.textContent = wPx + ' × ' + hPx + ' بكسل';
+    dpiPreview.textContent = dpi + ' DPI';
+
+    let warning = '';
+    let canApply = true;
+    if (wCm <= 0 || hCm <= 0) {
+      warning = '⚠️ اكتب قيمة أكبر من صفر';
+      canApply = false;
+    } else if (wPx > MAX_DIM || hPx > MAX_DIM) {
+      warning = '⚠️ الأبعاد كبيرة جداً (الحد الأقصى ' + MAX_DIM + ' بكسل). قلل المقاس أو اختر جودة أقل.';
+      canApply = false;
+    } else if (wPx * hPx > MAX_PIXELS) {
+      warning = '⚠️ إجمالي البكسلات كبير جداً. قلل المقاس أو اختر جودة أقل.';
+      canApply = false;
+    }
+    if (canApply && !aspectLock.checked && state.bgReady) {
+      const nativeRatio = state.bgNatural.w / state.bgNatural.h;
+      const customRatio = wCm / hCm;
+      if (Math.abs(nativeRatio - customRatio) > 0.02) {
+        warning = 'ℹ️ نسبة العرض/الطول مختلفة عن الأصل — الصورة واللوجو هيتشدوا شوية.';
+      }
+    }
+    if (warning) {
+      sizeWarning.textContent = warning;
+      sizeWarning.hidden = false;
+    } else {
+      sizeWarning.hidden = true;
+    }
+    applySizeBtn.disabled = !canApply;
+  }
+
+  function openSizeModal() {
+    if (!state.bgReady) {
+      showToast('ارفع الصورة الأول');
+      return;
+    }
+    if (state.customSizeCm) {
+      widthCmInput.value = state.customSizeCm.width.toFixed(1);
+      heightCmInput.value = state.customSizeCm.height.toFixed(1);
+      resetSizeBtn.hidden = false;
+    } else {
+      const def = getDefaultCm();
+      widthCmInput.value = def.width.toFixed(1);
+      heightCmInput.value = def.height.toFixed(1);
+      resetSizeBtn.hidden = true;
+    }
+    updateSizePreview();
+    sizeModal.classList.add('show');
+    sizeModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSizeModal() {
+    sizeModal.classList.remove('show');
+    sizeModal.setAttribute('aria-hidden', 'true');
+  }
+
+  widthCmInput.addEventListener('input', () => {
+    if (aspectLock.checked && state.bgReady) {
+      const w = parseFloat(widthCmInput.value) || 0;
+      const ratio = state.bgNatural.w / state.bgNatural.h;
+      if (w > 0 && ratio > 0) {
+        heightCmInput.value = (w / ratio).toFixed(1);
+      }
+    }
+    updateSizePreview();
+  });
+
+  heightCmInput.addEventListener('input', () => {
+    if (aspectLock.checked && state.bgReady) {
+      const h = parseFloat(heightCmInput.value) || 0;
+      const ratio = state.bgNatural.w / state.bgNatural.h;
+      if (h > 0 && ratio > 0) {
+        widthCmInput.value = (h * ratio).toFixed(1);
+      }
+    }
+    updateSizePreview();
+  });
+
+  aspectLock.addEventListener('change', updateSizePreview);
+
+  applySizeBtn.addEventListener('click', () => {
+    const wCm = parseFloat(widthCmInput.value);
+    const hCm = parseFloat(heightCmInput.value);
+    if (!wCm || !hCm || wCm <= 0 || hCm <= 0) {
+      showToast('⚠️ اكتب مقاس صحيح');
+      return;
+    }
+    if (isDefaultSize(wCm, hCm)) {
+      state.customSizeCm = null;
+      showToast('✓ تم استخدام المقاس الافتراضي');
+    } else {
+      state.customSizeCm = { width: wCm, height: hCm };
+      showToast('✓ تم تطبيق ' + wCm.toFixed(1) + '×' + hCm.toFixed(1) + ' سم');
+    }
+    updateInfo();
+    closeSizeModal();
+  });
+
+  resetSizeBtn.addEventListener('click', () => {
+    state.customSizeCm = null;
+    const def = getDefaultCm();
+    widthCmInput.value = def.width.toFixed(1);
+    heightCmInput.value = def.height.toFixed(1);
+    resetSizeBtn.hidden = true;
+    updateSizePreview();
+    updateInfo();
+    showToast('تم مسح المقاس المخصص');
+  });
+
+  cancelSizeBtn.addEventListener('click', closeSizeModal);
+  closeSizeBtn.addEventListener('click', closeSizeModal);
+  sizeModal.addEventListener('click', (e) => {
+    if (e.target === sizeModal) closeSizeModal();
+  });
+
+  openSizeBtn.addEventListener('click', openSizeModal);
+
+  // ===== Fullscreen preview logic =====
+  function getOutputDimensions() {
+    if (state.customSizeCm) {
+      return {
+        w: cmToPixels(state.customSizeCm.width),
+        h: cmToPixels(state.customSizeCm.height),
+      };
+    }
+    return {
+      w: state.bgNatural.w * state.qualityMult,
+      h: state.bgNatural.h * state.qualityMult,
+    };
+  }
+
+  function renderPreviewCanvas() {
+    const out = getOutputDimensions();
+    const maxDim = Math.max(out.w, out.h);
+    const renderScale = maxDim > MAX_PREVIEW_DIM ? MAX_PREVIEW_DIM / maxDim : 1;
+    const renderW = Math.round(out.w * renderScale);
+    const renderH = Math.round(out.h * renderScale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = renderW;
+    canvas.height = renderH;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    if (state.format === 'jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, renderW, renderH);
+    }
+    ctx.drawImage(bgImage, 0, 0, renderW, renderH);
+
+    const stageW = stage.clientWidth;
+    const stageH = stage.clientHeight;
+    const sx = renderW / stageW;
+    const sy = renderH / stageH;
+    const logoX = Math.round((parseFloat(logo.style.left) || 0) * sx);
+    const logoY = Math.round((parseFloat(logo.style.top) || 0) * sy);
+    const logoW = Math.round((parseFloat(logo.style.width) || 0) * sx);
+    const logoH = Math.round((parseFloat(logo.style.height) || 0) * sy);
+    ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+
+    return { canvas, outW: out.w, outH: out.h, renderW, renderH };
+  }
+
+  function computePreviewFit() {
+    const cw = previewCanvasWrap.clientWidth;
+    const ch = previewCanvasWrap.clientHeight;
+    const fit = Math.min(cw / previewState.imgW, ch / previewState.imgH);
+    previewState.fitScale = fit;
+    previewState.minScale = fit * 0.5;
+    previewState.maxScale = Math.max(fit * 8, 1);
+  }
+
+  function applyPreviewTransform() {
+    if (!previewState.imgEl) return;
+    previewState.imgEl.style.transform =
+      'translate(' + previewState.tx + 'px, ' + previewState.ty + 'px) scale(' + previewState.scale + ')';
+    const pct = previewState.fitScale > 0
+      ? Math.round(previewState.scale / previewState.fitScale * 100)
+      : 100;
+    previewZoomLevel.textContent = pct + '%';
+  }
+
+  function clampPreviewScale(s) {
+    return Math.max(previewState.minScale, Math.min(previewState.maxScale, s));
+  }
+
+  function clampPreviewPan() {
+    const cw = previewCanvasWrap.clientWidth;
+    const ch = previewCanvasWrap.clientHeight;
+    const iw = previewState.imgW * previewState.scale;
+    const ih = previewState.imgH * previewState.scale;
+    if (iw <= cw) {
+      previewState.tx = (cw - iw) / 2;
+    } else {
+      previewState.tx = Math.min(0, Math.max(cw - iw, previewState.tx));
+    }
+    if (ih <= ch) {
+      previewState.ty = (ch - ih) / 2;
+    } else {
+      previewState.ty = Math.min(0, Math.max(ch - ih, previewState.ty));
+    }
+  }
+
+  function resetPreviewView() {
+    const cw = previewCanvasWrap.clientWidth;
+    const ch = previewCanvasWrap.clientHeight;
+    previewState.scale = previewState.fitScale;
+    previewState.tx = (cw - previewState.imgW * previewState.scale) / 2;
+    previewState.ty = (ch - previewState.imgH * previewState.scale) / 2;
+    clampPreviewPan();
+    applyPreviewTransform();
+  }
+
+  function previewZoomAt(px, py, factor) {
+    const ix = (px - previewState.tx) / previewState.scale;
+    const iy = (py - previewState.ty) / previewState.scale;
+    const newScale = clampPreviewScale(previewState.scale * factor);
+    if (newScale === previewState.scale) return;
+    previewState.scale = newScale;
+    previewState.tx = px - ix * newScale;
+    previewState.ty = py - iy * newScale;
+    clampPreviewPan();
+    applyPreviewTransform();
+  }
+
+  function openPreview() {
+    if (!state.bgReady || !state.logoReady) return;
+
+    // Remove old canvas
+    if (previewState.imgEl && previewState.imgEl.parentNode) {
+      previewState.imgEl.parentNode.removeChild(previewState.imgEl);
+    }
+
+    // Render new canvas
+    const rendered = renderPreviewCanvas();
+    previewCanvasWrap.appendChild(rendered.canvas);
+
+    previewState.imgEl = rendered.canvas;
+    previewState.imgW = rendered.renderW;
+    previewState.imgH = rendered.renderH;
+
+    // Info
+    const cmInfo = state.customSizeCm
+      ? ' · ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم'
+      : '';
+    const dpiInfo = ' · ' + getCurrentDPI() + ' DPI';
+    previewInfo.textContent = rendered.outW + ' × ' + rendered.outH + ' px' + cmInfo + dpiInfo;
+
+    // Show
+    previewModal.classList.add('show');
+    previewModal.setAttribute('aria-hidden', 'false');
+    previewState.isOpen = true;
+
+    // Force reflow + compute fit
+    void previewCanvasWrap.offsetHeight;
+    computePreviewFit();
+    resetPreviewView();
+
+    // Show hint (only first time per session, or every time - let's do every time)
+    const oldHint = previewCanvasWrap.querySelector('.preview-hint');
+    if (oldHint) oldHint.remove();
+    const hint = document.createElement('div');
+    hint.className = 'preview-hint';
+    hint.textContent = '👆 اسحب للتحريك · اقرص/دوس مرتين للتكبير';
+    previewCanvasWrap.appendChild(hint);
+    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 4200);
+  }
+
+  function closePreview() {
+    previewModal.classList.remove('show');
+    previewModal.setAttribute('aria-hidden', 'true');
+    previewState.isOpen = false;
+    // Reset interaction state
+    pvTouchMode = null;
+    pvPanStart = null;
+    pvPinchStart = null;
+    pvMouseDown = false;
+    setTimeout(() => {
+      if (!previewState.isOpen) {
+        if (previewState.imgEl && previewState.imgEl.parentNode) {
+          previewState.imgEl.parentNode.removeChild(previewState.imgEl);
+        }
+        previewState.imgEl = null;
+      }
+    }, 250);
+  }
+
+  previewBtn.addEventListener('click', openPreview);
+  stagePreviewBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openPreview();
+  });
+
+  previewClose.addEventListener('click', closePreview);
+  previewReset.addEventListener('click', resetPreviewView);
+
+  previewZoomIn.addEventListener('click', () => {
+    const cw = previewCanvasWrap.clientWidth;
+    const ch = previewCanvasWrap.clientHeight;
+    previewZoomAt(cw / 2, ch / 2, 1.5);
+  });
+
+  previewZoomOut.addEventListener('click', () => {
+    const cw = previewCanvasWrap.clientWidth;
+    const ch = previewCanvasWrap.clientHeight;
+    previewZoomAt(cw / 2, ch / 2, 1 / 1.5);
+  });
+
+  // ===== Preview touch handling =====
+  let pvTouchMode = null;
+  let pvPanStart = null;
+  let pvPinchStart = null;
+  let pvLastTapTime = 0;
+  let pvTapPosition = { x: 0, y: 0 };
+  let pvTapMoved = false;
+
+  previewCanvasWrap.addEventListener('touchstart', (e) => {
+    if (!previewState.isOpen) return;
+    e.preventDefault();
+
+    if (e.touches.length === 1) {
+      pvTouchMode = 'pan';
+      pvTapMoved = false;
+      pvTapPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      pvPanStart = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        tx: previewState.tx,
+        ty: previewState.ty,
+      };
+    } else if (e.touches.length === 2) {
+      pvTouchMode = 'pinch';
+      const rect = previewCanvasWrap.getBoundingClientRect();
+      const x1 = e.touches[0].clientX - rect.left;
+      const y1 = e.touches[0].clientY - rect.top;
+      const x2 = e.touches[1].clientX - rect.left;
+      const y2 = e.touches[1].clientY - rect.top;
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+      pvPinchStart = {
+        dist,
+        scale: previewState.scale,
+        ix: (cx - previewState.tx) / previewState.scale,
+        iy: (cy - previewState.ty) / previewState.scale,
+      };
+      pvTapMoved = true;
+    }
+  }, { passive: false });
+
+  previewCanvasWrap.addEventListener('touchmove', (e) => {
+    if (!previewState.isOpen) return;
+    e.preventDefault();
+
+    if (pvTouchMode === 'pan' && e.touches.length === 1) {
+      const dx = e.touches[0].clientX - pvPanStart.x;
+      const dy = e.touches[0].clientY - pvPanStart.y;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) pvTapMoved = true;
+      previewState.tx = pvPanStart.tx + dx;
+      previewState.ty = pvPanStart.ty + dy;
+      clampPreviewPan();
+      applyPreviewTransform();
+    } else if (pvTouchMode === 'pinch' && e.touches.length === 2) {
+      const rect = previewCanvasWrap.getBoundingClientRect();
+      const x1 = e.touches[0].clientX - rect.left;
+      const y1 = e.touches[0].clientY - rect.top;
+      const x2 = e.touches[1].clientX - rect.left;
+      const y2 = e.touches[1].clientY - rect.top;
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+      const factor = dist / pvPinchStart.dist;
+      const newScale = clampPreviewScale(pvPinchStart.scale * factor);
+      previewState.scale = newScale;
+      previewState.tx = cx - pvPinchStart.ix * newScale;
+      previewState.ty = cy - pvPinchStart.iy * newScale;
+      clampPreviewPan();
+      applyPreviewTransform();
+    }
+  }, { passive: false });
+
+  previewCanvasWrap.addEventListener('touchend', (e) => {
+    if (!previewState.isOpen) return;
+
+    if (e.touches.length === 0) {
+      if (pvTouchMode === 'pan' && !pvTapMoved) {
+        const now = Date.now();
+        if (now - pvLastTapTime < 300) {
+          const rect = previewCanvasWrap.getBoundingClientRect();
+          const px = pvTapPosition.x - rect.left;
+          const py = pvTapPosition.y - rect.top;
+          if (previewState.scale > previewState.fitScale * 1.5) {
+            resetPreviewView();
+          } else {
+            previewZoomAt(px, py, 2.5);
+          }
+          pvLastTapTime = 0;
+        } else {
+          pvLastTapTime = now;
+        }
+      }
+      pvTouchMode = null;
+      pvPanStart = null;
+      pvPinchStart = null;
+    } else if (e.touches.length === 1) {
+      pvTouchMode = 'pan';
+      pvPanStart = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        tx: previewState.tx,
+        ty: previewState.ty,
+      };
+    }
+  }, { passive: false });
+
+  previewCanvasWrap.addEventListener('touchcancel', () => {
+    pvTouchMode = null;
+    pvPanStart = null;
+    pvPinchStart = null;
+  });
+
+  // ===== Preview mouse handling =====
+  let pvMouseDown = false;
+  let pvMouseStart = null;
+
+  previewCanvasWrap.addEventListener('mousedown', (e) => {
+    if (!previewState.isOpen) return;
+    if (e.button !== 0) return;
+    pvMouseDown = true;
+    pvMouseStart = {
+      x: e.clientX,
+      y: e.clientY,
+      tx: previewState.tx,
+      ty: previewState.ty,
+    };
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!pvMouseDown || !previewState.isOpen) return;
+    const dx = e.clientX - pvMouseStart.x;
+    const dy = e.clientY - pvMouseStart.y;
+    previewState.tx = pvMouseStart.tx + dx;
+    previewState.ty = pvMouseStart.ty + dy;
+    clampPreviewPan();
+    applyPreviewTransform();
+  });
+
+  window.addEventListener('mouseup', () => {
+    pvMouseDown = false;
+  });
+
+  previewCanvasWrap.addEventListener('wheel', (e) => {
+    if (!previewState.isOpen) return;
+    e.preventDefault();
+    const rect = previewCanvasWrap.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.18 : 1 / 1.18;
+    previewZoomAt(px, py, factor);
+  }, { passive: false });
+
+  // ===== Global Escape =====
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (previewState.isOpen) closePreview();
+      else if (sizeModal.classList.contains('show')) closeSizeModal();
+    }
+  });
 
   // ===== Drag logo =====
   let dragging = false;
   let dragStart = { x: 0, y: 0 };
   let logoStart = { px: 0, py: 0 };
+  let logoDragEndedAt = 0;
 
   function getPoint(e) {
     if (e.touches && e.touches.length) {
@@ -940,17 +1974,14 @@
     const p = getPoint(e);
     const dx = p.x - dragStart.x;
     const dy = p.y - dragStart.y;
-
     const stageW = stage.clientWidth;
     const stageH = stage.clientHeight;
     const logoW = parseFloat(logo.style.width) || 0;
     const logoH = parseFloat(logo.style.height) || 0;
     const maxX = Math.max(0, stageW - logoW);
     const maxY = Math.max(0, stageH - logoH);
-
     let newX = Math.min(Math.max(0, logoStart.px + dx), maxX);
     let newY = Math.min(Math.max(0, logoStart.py + dy), maxY);
-
     logo.style.left = newX + 'px';
     logo.style.top = newY + 'px';
     state.logoPos.x = stageW > 0 ? newX / stageW : 0;
@@ -961,6 +1992,7 @@
     if (!dragging) return;
     dragging = false;
     logo.style.cursor = 'grab';
+    logoDragEndedAt = Date.now();
   }
 
   logo.addEventListener('mousedown', startDrag);
@@ -975,51 +2007,61 @@
     if (dragging) e.preventDefault();
   }, { passive: false });
 
+  // ===== Stage click → size modal =====
+  stage.addEventListener('click', (e) => {
+    if (Date.now() - logoDragEndedAt < 300) return;
+    if (e.target.closest('#logo')) return;
+    if (e.target.closest('.stage-float-btn')) return;
+    if (!state.bgReady) return;
+    openSizeModal();
+  });
+
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(fitStageToViewport, 150);
+    if (previewState.isOpen) {
+      requestAnimationFrame(() => {
+        const oldFit = previewState.fitScale;
+        const oldScale = previewState.scale;
+        computePreviewFit();
+        if (oldFit > 0) {
+          const relZoom = oldScale / oldFit;
+          previewState.scale = clampPreviewScale(previewState.fitScale * relZoom);
+        }
+        clampPreviewPan();
+        applyPreviewTransform();
+      });
+    }
   });
 
-  // ===== Sharpen (unsharp mask) =====
+  // ===== Sharpen =====
   function trySharpen(canvas, amount) {
     try {
       const w = canvas.width;
       const h = canvas.height;
-      const pixels = w * h;
-
-      if (pixels > 15000000) {
-        console.warn('Image too large for sharpening (' + pixels + ' px), skipping');
-        return false;
-      }
-
+      if (w * h > 15000000) return false;
       const ctx = canvas.getContext('2d');
-
       const blurCanvas = document.createElement('canvas');
       blurCanvas.width = w;
       blurCanvas.height = h;
       const bctx = blurCanvas.getContext('2d');
       bctx.filter = 'blur(1.2px)';
       bctx.drawImage(canvas, 0, 0);
-
       const orig = ctx.getImageData(0, 0, w, h);
       const bd = bctx.getImageData(0, 0, w, h).data;
       const od = orig.data;
-
       for (let i = 0; i < od.length; i += 4) {
         const dr = od[i] - bd[i];
         const dg = od[i + 1] - bd[i + 1];
         const db = od[i + 2] - bd[i + 2];
-
         const r = od[i] + dr * amount;
         const g = od[i + 1] + dg * amount;
         const b = od[i + 2] + db * amount;
-
         od[i]     = r < 0 ? 0 : r > 255 ? 255 : r;
         od[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
         od[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
       }
-
       ctx.putImageData(orig, 0, 0);
       return true;
     } catch (e) {
@@ -1031,36 +2073,28 @@
   // ===== Export =====
   downloadBtn.addEventListener('click', async () => {
     if (!state.bgReady || !state.logoReady) return;
-
     loading.classList.add('show');
     loadingText.textContent = 'جاري تجهيز الصورة...';
-
     try {
       await new Promise(r => setTimeout(r, 60));
-
-      const mult = state.qualityMult;
       const nativeW = state.bgNatural.w;
       const nativeH = state.bgNatural.h;
-      const outW = nativeW * mult;
-      const outH = nativeH * mult;
+      const mult = state.qualityMult;
+      const out = getOutputDimensions();
+      const outW = out.w;
+      const outH = out.h;
 
-      // Safety limits
-      const MAX_DIM = 16000;
-      const MAX_PIXELS = 100000000;
       if (outW > MAX_DIM || outH > MAX_DIM) {
-        showToast('⚠️ الصورة كبيرة جداً — اختر جودة أقل', 4000);
+        showToast('⚠️ الصورة كبيرة جداً — قلل المقاس أو الجودة', 4000);
         loading.classList.remove('show');
         return;
       }
       if (outW * outH > MAX_PIXELS) {
-        showToast('⚠️ الصورة كبيرة جداً — اختر ×2 أو عادي', 4000);
+        showToast('⚠️ الصورة كبيرة جداً — قلل المقاس أو الجودة', 4000);
         loading.classList.remove('show');
         return;
       }
 
-      // ============================================
-      // Step 1: Prepare FINAL canvas at OUTPUT resolution
-      // ============================================
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = outW;
       finalCanvas.height = outH;
@@ -1068,77 +2102,53 @@
       fctx.imageSmoothingEnabled = true;
       fctx.imageSmoothingQuality = 'high';
 
-      // White background for JPEG
       if (state.format === 'jpeg') {
         fctx.fillStyle = '#ffffff';
         fctx.fillRect(0, 0, outW, outH);
       }
 
-      // ============================================
-      // Step 2: Background — native + sharpen + upscale
-      // ============================================
       let sharpenApplied = false;
       let bgSource = bgImage;
+      const outputRatio = Math.max(outW / nativeW, outH / nativeH);
+      const needsSharpen = mult > 1 || outputRatio > 1.5;
 
-      if (mult > 1) {
+      if (needsSharpen) {
         loadingText.textContent = 'جاري تحسين الحدّة...';
         await new Promise(r => setTimeout(r, 30));
-
         const nativeCanvas = document.createElement('canvas');
         nativeCanvas.width = nativeW;
         nativeCanvas.height = nativeH;
         const nctx = nativeCanvas.getContext('2d');
         nctx.imageSmoothingEnabled = true;
         nctx.imageSmoothingQuality = 'high';
-
         if (state.format === 'jpeg') {
           nctx.fillStyle = '#ffffff';
           nctx.fillRect(0, 0, nativeW, nativeH);
         }
-
         nctx.drawImage(bgImage, 0, 0, nativeW, nativeH);
-
-        const sharpenAmount = mult === 2 ? 0.55 : 0.85;
+        const sharpenAmount = mult === 3 ? 0.85 : (mult === 2 ? 0.55 : 0.4);
         sharpenApplied = trySharpen(nativeCanvas, sharpenAmount);
         bgSource = nativeCanvas;
       }
 
-      loadingText.textContent = 'جاري تكبير الخلفية...';
+      loadingText.textContent = 'جاري تجهيز الخلفية...';
       await new Promise(r => setTimeout(r, 30));
-
-      // Draw background scaled to output resolution
       fctx.drawImage(bgSource, 0, 0, outW, outH);
 
-      // ============================================
-      // Step 3: Logo — drawn DIRECTLY at OUTPUT resolution from source
-      // 🔑 This is the fix: no more double-blur for the logo
-      // ============================================
       loadingText.textContent = 'جاري رسم اللوجو بأعلى جودة...';
       await new Promise(r => setTimeout(r, 30));
-
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
-      const scaleX = outW / stageW;
-      const scaleY = outH / stageH;
-
-      const logoXscreen = parseFloat(logo.style.left) || 0;
-      const logoYscreen = parseFloat(logo.style.top) || 0;
-      const logoWscreen = parseFloat(logo.style.width) || 0;
-      const logoHscreen = parseFloat(logo.style.height) || 0;
-
-      // Round to whole pixels to avoid sub-pixel blur on logo edges
-      const logoX = Math.round(logoXscreen * scaleX);
-      const logoY = Math.round(logoYscreen * scaleY);
-      const logoW = Math.round(logoWscreen * scaleX);
-      const logoH = Math.round(logoHscreen * scaleY);
-
+      const sx = outW / stageW;
+      const sy = outH / stageH;
+      const logoX = Math.round((parseFloat(logo.style.left) || 0) * sx);
+      const logoY = Math.round((parseFloat(logo.style.top) || 0) * sy);
+      const logoW = Math.round((parseFloat(logo.style.width) || 0) * sx);
+      const logoH = Math.round((parseFloat(logo.style.height) || 0) * sy);
       fctx.imageSmoothingEnabled = true;
       fctx.imageSmoothingQuality = 'high';
       fctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
-      // ============================================
-      // Step 4: Export to data URL
-      // ============================================
       loadingText.textContent = 'جاري إنشاء الملف...';
       await new Promise(r => setTimeout(r, 30));
 
@@ -1154,18 +2164,12 @@
           mimeType = 'PNG';
         }
       } catch (secErr) {
-        if (secErr.name === 'SecurityError') {
-          throw new Error('SECURITY');
-        }
+        if (secErr.name === 'SecurityError') throw new Error('SECURITY');
         throw secErr;
       }
 
-      // ============================================
-      // Step 5: Download with user's filename
-      // ============================================
       const baseName = sanitizeFilename(filenameInput.value);
       const fileName = baseName + '.' + ext;
-
       const a = document.createElement('a');
       a.download = fileName;
       a.href = dataURL;
@@ -1173,15 +2177,18 @@
       a.click();
       document.body.removeChild(a);
 
-      const parts = ['✓ تم التنزيل', outW + '×' + outH, mimeType];
-      if (mult > 1) parts.push('لوجو HD');
-      if (mult > 1 && sharpenApplied) parts.push('حِدّة');
+      const parts = ['✓ تم التنزيل', outW + '×' + outH];
+      if (state.customSizeCm) {
+        parts.push(state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم');
+      }
+      parts.push(mimeType);
+      if (sharpenApplied) parts.push('حِدّة');
       showToast(parts.join(' · '), 3200);
 
     } catch (err) {
       console.error(err);
       if (err.message === 'SECURITY') {
-        showToast('⚠️ المتصفح منع التصدير — شغّل الصفحة عبر سيرفر محلي (python -m http.server)', 6000);
+        showToast('⚠️ المتصفح منع التصدير — شغّل الصفحة عبر سيرفر محلي', 6000);
       } else {
         showToast('حدث خطأ أثناء التصدير', 4000);
       }
