@@ -98,13 +98,12 @@
 
   #logo:active { cursor: grabbing; }
 
-  /* Floating preview button on stage */
   .stage-float-btn {
     position: absolute;
     top: 8px;
     right: 8px;
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: rgba(10, 77, 140, 0.9);
     color: white;
@@ -126,10 +125,7 @@
     background: rgba(10, 77, 140, 1);
   }
 
-  .stage-float-btn svg {
-    width: 18px;
-    height: 18px;
-  }
+  .stage-float-btn svg { width: 20px; height: 20px; }
 
   #emptyState {
     position: absolute;
@@ -144,52 +140,59 @@
     padding: 20px;
   }
 
-  #emptyState svg {
-    width: 60px;
-    height: 60px;
-    opacity: 0.6;
-  }
-
+  #emptyState svg { width: 60px; height: 60px; opacity: 0.6; }
   #emptyState p { font-size: 14px; opacity: 0.8; }
   #emptyState small { font-size: 11px; opacity: 0.6; }
 
   .controls {
     background: var(--white);
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
     box-shadow: 0 -3px 15px rgba(6, 52, 94, 0.12);
     display: flex;
     flex-direction: column;
     gap: 10px;
     flex-shrink: 0;
-    max-height: 58vh;
+    max-height: 62vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    flex-shrink: 0;
   }
 
   .btn {
     flex: 1;
     border: none;
-    border-radius: 12px;
-    padding: 13px 10px;
+    border-radius: 14px;
+    padding: 15px 10px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 8px;
     white-space: nowrap;
+    min-height: 52px;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
   }
 
   .btn:active { transform: scale(0.96); }
 
-  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 
   .btn-primary {
     background: linear-gradient(135deg, var(--blue), var(--blue-light));
     color: var(--white);
     box-shadow: 0 3px 10px rgba(10, 77, 140, 0.3);
+    font-size: 15px;
   }
 
   .btn-outline {
@@ -211,13 +214,14 @@
     align-items: center;
     gap: 12px;
     background: var(--bg);
-    border-radius: 12px;
-    padding: 10px 14px;
+    border-radius: 14px;
+    padding: 12px 14px;
+    min-height: 52px;
   }
 
   .size-control label {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--blue);
     white-space: nowrap;
   }
@@ -236,8 +240,8 @@
   .size-control input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: var(--white);
     border: 3px solid var(--blue);
@@ -246,8 +250,8 @@
   }
 
   .size-control input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: var(--white);
     border: 3px solid var(--blue);
@@ -257,12 +261,12 @@
 
   .size-value {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--blue);
-    min-width: 42px;
+    min-width: 48px;
     text-align: center;
     background: var(--white);
-    padding: 4px 6px;
+    padding: 5px 6px;
     border-radius: 8px;
   }
 
@@ -271,13 +275,14 @@
     align-items: center;
     gap: 10px;
     background: var(--bg);
-    border-radius: 12px;
-    padding: 8px 10px 8px 14px;
+    border-radius: 14px;
+    padding: 10px 12px;
+    min-height: 52px;
   }
 
   .quality-control > label {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--blue);
     white-space: nowrap;
   }
@@ -298,8 +303,8 @@
     color: var(--blue);
     font-family: inherit;
     font-size: 12px;
-    font-weight: 700;
-    padding: 8px 4px;
+    font-weight: 800;
+    padding: 10px 4px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s;
@@ -308,6 +313,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
+    min-height: 36px;
   }
 
   .segmented button.active {
@@ -323,8 +329,8 @@
     flex-direction: column;
     gap: 6px;
     background: var(--bg);
-    border-radius: 12px;
-    padding: 10px 12px;
+    border-radius: 14px;
+    padding: 12px;
   }
 
   .filename-control .filename-row {
@@ -335,7 +341,7 @@
 
   .filename-control label {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--blue);
     white-space: nowrap;
   }
@@ -346,7 +352,7 @@
     align-items: center;
     background: var(--white);
     border: 2px solid transparent;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0 6px 0 0;
     transition: border-color 0.15s;
     min-width: 0;
@@ -358,12 +364,12 @@
     flex: 1;
     border: none;
     background: transparent;
-    border-radius: 8px 0 0 8px;
-    padding: 9px 10px;
-    font-size: 13px;
+    border-radius: 10px 0 0 10px;
+    padding: 11px 10px;
+    font-size: 14px;
     font-family: inherit;
     color: var(--blue-dark);
-    font-weight: 600;
+    font-weight: 700;
     outline: none;
     direction: ltr;
     text-align: left;
@@ -377,7 +383,7 @@
     font-weight: 800;
     color: var(--blue);
     background: rgba(10, 77, 140, 0.08);
-    padding: 5px 9px;
+    padding: 6px 10px;
     border-radius: 6px;
     direction: ltr;
     letter-spacing: 0.5px;
@@ -388,11 +394,11 @@
     border: none;
     background: rgba(10, 77, 140, 0.08);
     color: var(--blue);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -434,12 +440,7 @@
     flex-wrap: wrap;
   }
 
-  .info-bar span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
+  .info-bar span { display: flex; align-items: center; gap: 4px; }
   .info-bar b { font-weight: 700; }
 
   .hidden-input {
@@ -510,7 +511,7 @@
     align-items: center;
     justify-content: center;
     z-index: 300;
-    padding: 20px;
+    padding: 16px;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
@@ -522,8 +523,8 @@
     border-radius: 20px;
     width: 100%;
     max-width: 440px;
-    max-height: calc(100vh - 40px);
-    max-height: calc(100dvh - 40px);
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
     overflow-y: auto;
     padding: 20px;
     box-shadow: 0 20px 60px rgba(6, 52, 94, 0.5);
@@ -555,8 +556,8 @@
     font-size: 16px;
     color: var(--blue);
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -611,7 +612,7 @@
     flex: 1;
     border: none;
     background: transparent;
-    padding: 11px 10px;
+    padding: 12px 10px;
     font-size: 16px;
     font-weight: 700;
     font-family: inherit;
@@ -648,14 +649,14 @@
     cursor: pointer;
     user-select: none;
     background: var(--bg);
-    padding: 9px 12px;
+    padding: 10px 12px;
     border-radius: 10px;
     font-weight: 600;
   }
 
   .toggle-label input {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     accent-color: var(--blue);
     cursor: pointer;
   }
@@ -707,7 +708,7 @@
 
   .modal-btn {
     flex: 1;
-    padding: 12px 8px;
+    padding: 13px 8px;
     border-radius: 10px;
     border: none;
     font-size: 13px;
@@ -716,6 +717,7 @@
     cursor: pointer;
     transition: transform 0.12s, opacity 0.12s;
     white-space: nowrap;
+    min-height: 46px;
   }
 
   .modal-btn:active { transform: scale(0.96); }
@@ -768,11 +770,11 @@
     top: 0;
     left: 0;
     right: 0;
-    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+    padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0));
     z-index: 10;
     color: white;
@@ -786,18 +788,19 @@
     font-size: 11px;
     font-weight: 600;
     background: rgba(0,0,0,0.5);
-    padding: 7px 11px;
+    padding: 8px 11px;
     border-radius: 8px;
     direction: ltr;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: #e8f0f9;
     border: 1px solid rgba(255,255,255,0.15);
     line-height: 1.4;
+    max-width: 100%;
   }
 
   .preview-actions {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     align-items: center;
     margin-right: auto;
   }
@@ -806,10 +809,10 @@
     background: rgba(255,255,255,0.15);
     border: 1px solid rgba(255,255,255,0.2);
     color: white;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -835,14 +838,15 @@
   #previewZoomLevel {
     font-size: 12px;
     font-weight: 700;
-    min-width: 52px;
+    min-width: 54px;
     text-align: center;
     direction: ltr;
     background: rgba(0,0,0,0.5);
-    padding: 8px 6px;
+    padding: 9px 6px;
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.15);
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: white;
   }
 
   .preview-canvas-wrap {
@@ -858,19 +862,48 @@
 
   .preview-canvas-wrap:active { cursor: grabbing; }
 
-  .preview-canvas-wrap > canvas {
+  .preview-transform {
     position: absolute;
     top: 0;
     left: 0;
-    max-width: none;
-    max-height: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    pointer-events: none;
     transform-origin: 0 0;
     will-change: transform;
-    image-rendering: -webkit-optimize-contrast;
+  }
+
+  .preview-image {
+    position: relative;
     box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    background: #fff;
+  }
+
+  .preview-image > canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .preview-logo {
+    position: absolute;
+    pointer-events: auto;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+    filter: drop-shadow(0 2px 6px rgba(6, 52, 94, 0.25));
+    z-index: 2;
+    transition: filter 0.15s;
+  }
+
+  .preview-logo.dragging {
+    cursor: grabbing;
+    filter: drop-shadow(0 4px 14px rgba(10, 77, 140, 0.6));
   }
 
   .preview-hint {
@@ -878,9 +911,9 @@
     bottom: calc(16px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.55);
-    color: rgba(255,255,255,0.85);
-    padding: 8px 14px;
+    background: rgba(0,0,0,0.65);
+    color: rgba(255,255,255,0.9);
+    padding: 9px 15px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
@@ -888,7 +921,7 @@
     pointer-events: none;
     white-space: nowrap;
     border: 1px solid rgba(255,255,255,0.1);
-    animation: hintFadeOut 4s ease-in-out forwards;
+    animation: hintFadeOut 4.5s ease-in-out forwards;
   }
 
   @keyframes hintFadeOut {
@@ -928,14 +961,40 @@
   </div>
 
   <div class="controls">
-    <button class="btn btn-outline" id="uploadBgBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/>
-        <line x1="12" y1="3" x2="12" y2="15"/>
-      </svg>
-      رفع الصورة الأصلية
-    </button>
+    <div class="btn-row">
+      <button class="btn btn-outline" id="uploadBgFilesBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        من الملفات
+      </button>
+      <button class="btn btn-outline" id="uploadBgGalleryBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        من المعرض
+      </button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="previewBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+        معاينة
+      </button>
+      <button class="btn btn-outline" id="openSizeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 3v18"/>
+        </svg>
+        <span id="openSizeBtnText">المقاس</span>
+      </button>
+    </div>
 
     <button class="btn btn-outline" id="chooseLogoBtn" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -952,11 +1011,11 @@
     </div>
 
     <div class="quality-control">
-      <label>الجودة والتفاصيل</label>
+      <label>الجودة</label>
       <div class="segmented" id="qualitySegmented">
         <button data-mult="1" class="active">عادي</button>
-        <button data-mult="2">×2 <small>حِدّة</small></button>
-        <button data-mult="3">×3 <small>حِدّة</small></button>
+        <button data-mult="2">×2 <small>HD</small></button>
+        <button data-mult="3">×3 <small>Ultra</small></button>
       </div>
     </div>
 
@@ -974,28 +1033,11 @@
       <span class="size-value" id="jpegQualityValue">95%</span>
     </div>
 
-    <button class="btn btn-outline" id="openSizeBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <path d="M3 9h18M9 3v18"/>
-      </svg>
-      <span id="openSizeBtnText">تخصيص المقاس بالسنتيمتر</span>
-    </button>
-
-    <button class="btn btn-outline" id="previewBtn" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="7"/>
-        <path d="M21 21l-4.35-4.35"/>
-        <path d="M11 8v6M8 11h6"/>
-      </svg>
-      معاينة كاملة (Review)
-    </button>
-
     <div class="filename-control">
       <div class="filename-row">
         <label for="filenameInput">اسم الملف</label>
         <div class="filename-input-wrap">
-          <input type="text" id="filenameInput" value="" maxlength="80" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
+          <input type="text" id="filenameInput" value="" maxlength="80" spellcheck="false" autocomplete="off" placeholder="اتركه فاضي للاسم الافتراضي">
           <span class="ext-badge" id="extBadge">.png</span>
         </div>
         <button type="button" class="filename-reset" id="filenameReset" title="مسح الاسم" aria-label="مسح الاسم">↺</button>
@@ -1020,7 +1062,7 @@
   </div>
 </div>
 
-<input type="file" id="bgInput" accept="image/*" class="hidden-input">
+<input type="file" id="bgInput" accept="image/*,.heic,.heif" class="hidden-input">
 <input type="file" id="logoInput" accept="image/*" class="hidden-input">
 <div id="toast"></div>
 <div id="loading">
@@ -1107,7 +1149,8 @@
   const logoHint = document.getElementById('logoHint');
   const bgInput = document.getElementById('bgInput');
   const logoInput = document.getElementById('logoInput');
-  const uploadBgBtn = document.getElementById('uploadBgBtn');
+  const uploadBgFilesBtn = document.getElementById('uploadBgFilesBtn');
+  const uploadBgGalleryBtn = document.getElementById('uploadBgGalleryBtn');
   const chooseLogoBtn = document.getElementById('chooseLogoBtn');
   const downloadBtn = document.getElementById('downloadBtn');
   const sizeSlider = document.getElementById('sizeSlider');
@@ -1135,7 +1178,6 @@
   const previewBtn = document.getElementById('previewBtn');
   const stagePreviewBtn = document.getElementById('stagePreviewBtn');
 
-  // Size modal
   const sizeModal = document.getElementById('sizeModal');
   const widthCmInput = document.getElementById('widthCm');
   const heightCmInput = document.getElementById('heightCm');
@@ -1148,7 +1190,6 @@
   const closeSizeBtn = document.getElementById('closeSizeBtn');
   const resetSizeBtn = document.getElementById('resetSizeBtn');
 
-  // Preview modal
   const previewModal = document.getElementById('previewModal');
   const previewCanvasWrap = document.getElementById('previewCanvasWrap');
   const previewInfo = document.getElementById('previewInfo');
@@ -1178,7 +1219,6 @@
     customSizeCm: null,
   };
 
-  // Preview state
   const previewState = {
     isOpen: false,
     scale: 1,
@@ -1187,9 +1227,18 @@
     fitScale: 1,
     minScale: 0.05,
     maxScale: 10,
-    imgEl: null,
-    imgW: 0,
-    imgH: 0,
+    transformEl: null,
+    imageEl: null,
+    logoImg: null,
+    bgCanvas: null,
+    renderW: 0,
+    renderH: 0,
+    outW: 0,
+    outH: 0,
+    logoX: 0,
+    logoY: 0,
+    logoW: 0,
+    logoH: 0,
   };
 
   let toastTimer;
@@ -1222,7 +1271,7 @@
     return Math.round(cm / 2.54 * getCurrentDPI());
   }
 
-  // ===== Filename helpers =====
+  // ===== Filename =====
   function getExtension() {
     return state.format === 'jpeg' ? 'jpg' : 'png';
   }
@@ -1310,11 +1359,8 @@
     e.target.value = '';
   });
 
-  uploadBgBtn.addEventListener('click', () => bgInput.click());
-
-  bgInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // ===== Image upload =====
+  function handleBgFile(file) {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -1336,6 +1382,18 @@
       URL.revokeObjectURL(url);
     };
     img.src = url;
+  }
+
+  function openBgPicker() {
+    bgInput.click();
+  }
+
+  uploadBgFilesBtn.addEventListener('click', openBgPicker);
+  uploadBgGalleryBtn.addEventListener('click', openBgPicker);
+
+  bgInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleBgFile(file);
     e.target.value = '';
   });
 
@@ -1447,20 +1505,21 @@
       h = state.bgNatural.h * state.qualityMult;
       qualityText = state.qualityMult === 1
         ? '🎯 دقة أصلية'
-        : (state.qualityMult === 2 ? '🎯 ×2 + حِدّة' : '🎯 ×3 + حِدّة');
+        : (state.qualityMult === 2 ? '🎯 ×2 HD' : '🎯 ×3 Ultra');
     }
     infoDim.textContent = w + ' × ' + h;
     infoQuality.textContent = qualityText;
     infoFormat.textContent = '📄 ' + state.format.toUpperCase();
     infoBar.style.display = 'flex';
+
     if (state.customSizeCm) {
-      openSizeBtnText.textContent = '📏 المقاس: ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم';
+      openSizeBtnText.textContent = state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + 'سم';
     } else {
-      openSizeBtnText.textContent = 'تخصيص المقاس بالسنتيمتر';
+      openSizeBtnText.textContent = 'المقاس';
     }
   }
 
-  // ===== Size modal logic =====
+  // ===== Size modal =====
   function isDefaultSize(wCm, hCm) {
     const def = getDefaultCm();
     return Math.abs(wCm - def.width) < 0.1 && Math.abs(hCm - def.height) < 0.1;
@@ -1481,10 +1540,10 @@
       warning = '⚠️ اكتب قيمة أكبر من صفر';
       canApply = false;
     } else if (wPx > MAX_DIM || hPx > MAX_DIM) {
-      warning = '⚠️ الأبعاد كبيرة جداً (الحد الأقصى ' + MAX_DIM + ' بكسل). قلل المقاس أو اختر جودة أقل.';
+      warning = '⚠️ الأبعاد كبيرة جداً (الحد الأقصى ' + MAX_DIM + ' بكسل). قلل المقاس أو الجودة.';
       canApply = false;
     } else if (wPx * hPx > MAX_PIXELS) {
-      warning = '⚠️ إجمالي البكسلات كبير جداً. قلل المقاس أو اختر جودة أقل.';
+      warning = '⚠️ إجمالي البكسلات كبير جداً. قلل المقاس أو الجودة.';
       canApply = false;
     }
     if (canApply && !aspectLock.checked && state.bgReady) {
@@ -1589,7 +1648,7 @@
 
   openSizeBtn.addEventListener('click', openSizeModal);
 
-  // ===== Fullscreen preview logic =====
+  // ===== Preview =====
   function getOutputDimensions() {
     if (state.customSizeCm) {
       return {
@@ -1603,51 +1662,125 @@
     };
   }
 
-  function renderPreviewCanvas() {
+  function openPreview() {
+    if (!state.bgReady || !state.logoReady) return;
+
+    previewCanvasWrap.innerHTML = '';
+
     const out = getOutputDimensions();
     const maxDim = Math.max(out.w, out.h);
     const renderScale = maxDim > MAX_PREVIEW_DIM ? MAX_PREVIEW_DIM / maxDim : 1;
-    const renderW = Math.round(out.w * renderScale);
-    const renderH = Math.round(out.h * renderScale);
+    const renderW = Math.max(1, Math.round(out.w * renderScale));
+    const renderH = Math.max(1, Math.round(out.h * renderScale));
 
-    const canvas = document.createElement('canvas');
-    canvas.width = renderW;
-    canvas.height = renderH;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    const transformEl = document.createElement('div');
+    transformEl.className = 'preview-transform';
 
+    const imageEl = document.createElement('div');
+    imageEl.className = 'preview-image';
+    imageEl.style.width = renderW + 'px';
+    imageEl.style.height = renderH + 'px';
+
+    const bgCanvas = document.createElement('canvas');
+    bgCanvas.width = renderW;
+    bgCanvas.height = renderH;
+    const bctx = bgCanvas.getContext('2d');
+    bctx.imageSmoothingEnabled = true;
+    bctx.imageSmoothingQuality = 'high';
     if (state.format === 'jpeg') {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, renderW, renderH);
+      bctx.fillStyle = '#fff';
+      bctx.fillRect(0, 0, renderW, renderH);
     }
-    ctx.drawImage(bgImage, 0, 0, renderW, renderH);
+    bctx.drawImage(bgImage, 0, 0, renderW, renderH);
 
-    const stageW = stage.clientWidth;
-    const stageH = stage.clientHeight;
-    const sx = renderW / stageW;
-    const sy = renderH / stageH;
-    const logoX = Math.round((parseFloat(logo.style.left) || 0) * sx);
-    const logoY = Math.round((parseFloat(logo.style.top) || 0) * sy);
-    const logoW = Math.round((parseFloat(logo.style.width) || 0) * sx);
-    const logoH = Math.round((parseFloat(logo.style.height) || 0) * sy);
-    ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+    const logoImg = document.createElement('img');
+    logoImg.src = logo.src;
+    logoImg.draggable = false;
+    logoImg.className = 'preview-logo';
 
-    return { canvas, outW: out.w, outH: out.h, renderW, renderH };
+    const logoWRender = (state.logoScalePct / 100) * renderW;
+    const logoHRender = logoWRender * (state.logoNatural.h / state.logoNatural.w);
+    const logoXRender = state.logoPos.x * renderW;
+    const logoYRender = state.logoPos.y * renderH;
+
+    logoImg.style.left = logoXRender + 'px';
+    logoImg.style.top = logoYRender + 'px';
+    logoImg.style.width = logoWRender + 'px';
+    logoImg.style.height = logoHRender + 'px';
+
+    imageEl.appendChild(bgCanvas);
+    imageEl.appendChild(logoImg);
+    transformEl.appendChild(imageEl);
+    previewCanvasWrap.appendChild(transformEl);
+
+    previewState.transformEl = transformEl;
+    previewState.imageEl = imageEl;
+    previewState.logoImg = logoImg;
+    previewState.bgCanvas = bgCanvas;
+    previewState.renderW = renderW;
+    previewState.renderH = renderH;
+    previewState.outW = out.w;
+    previewState.outH = out.h;
+    previewState.logoX = logoXRender;
+    previewState.logoY = logoYRender;
+    previewState.logoW = logoWRender;
+    previewState.logoH = logoHRender;
+
+    const cmInfo = state.customSizeCm
+      ? ' · ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم'
+      : '';
+    previewInfo.textContent = out.w + ' × ' + out.h + ' px · ' + getCurrentDPI() + ' DPI' + cmInfo;
+
+    previewModal.classList.add('show');
+    previewModal.setAttribute('aria-hidden', 'false');
+    previewState.isOpen = true;
+
+    void previewCanvasWrap.offsetHeight;
+    computePreviewFit();
+    resetPreviewView();
+
+    const hint = document.createElement('div');
+    hint.className = 'preview-hint';
+    hint.textContent = 'اسحب اللوجو لتحريكه · اقرص للتكبير · دوس مرتين للزووم';
+    previewCanvasWrap.appendChild(hint);
+    setTimeout(() => { if (hint.parentNode) hint.parentNode.removeChild(hint); }, 4500);
+  }
+
+  function closePreview() {
+    previewModal.classList.remove('show');
+    previewModal.setAttribute('aria-hidden', 'true');
+    previewState.isOpen = false;
+    pvTouchMode = null;
+    pvPanStart = null;
+    pvPinchStart = null;
+    pvLogoStart = null;
+    pvMouseMode = null;
+    pvMouseStart = null;
+    setTimeout(() => {
+      if (!previewState.isOpen) {
+        if (previewState.transformEl && previewState.transformEl.parentNode) {
+          previewState.transformEl.parentNode.removeChild(previewState.transformEl);
+        }
+        previewState.transformEl = null;
+        previewState.imageEl = null;
+        previewState.logoImg = null;
+        previewState.bgCanvas = null;
+      }
+    }, 250);
   }
 
   function computePreviewFit() {
     const cw = previewCanvasWrap.clientWidth;
     const ch = previewCanvasWrap.clientHeight;
-    const fit = Math.min(cw / previewState.imgW, ch / previewState.imgH);
+    const fit = Math.min(cw / previewState.renderW, ch / previewState.renderH);
     previewState.fitScale = fit;
     previewState.minScale = fit * 0.5;
     previewState.maxScale = Math.max(fit * 8, 1);
   }
 
   function applyPreviewTransform() {
-    if (!previewState.imgEl) return;
-    previewState.imgEl.style.transform =
+    if (!previewState.transformEl) return;
+    previewState.transformEl.style.transform =
       'translate(' + previewState.tx + 'px, ' + previewState.ty + 'px) scale(' + previewState.scale + ')';
     const pct = previewState.fitScale > 0
       ? Math.round(previewState.scale / previewState.fitScale * 100)
@@ -1662,26 +1795,20 @@
   function clampPreviewPan() {
     const cw = previewCanvasWrap.clientWidth;
     const ch = previewCanvasWrap.clientHeight;
-    const iw = previewState.imgW * previewState.scale;
-    const ih = previewState.imgH * previewState.scale;
-    if (iw <= cw) {
-      previewState.tx = (cw - iw) / 2;
-    } else {
-      previewState.tx = Math.min(0, Math.max(cw - iw, previewState.tx));
-    }
-    if (ih <= ch) {
-      previewState.ty = (ch - ih) / 2;
-    } else {
-      previewState.ty = Math.min(0, Math.max(ch - ih, previewState.ty));
-    }
+    const iw = previewState.renderW * previewState.scale;
+    const ih = previewState.renderH * previewState.scale;
+    if (iw <= cw) previewState.tx = (cw - iw) / 2;
+    else previewState.tx = Math.min(0, Math.max(cw - iw, previewState.tx));
+    if (ih <= ch) previewState.ty = (ch - ih) / 2;
+    else previewState.ty = Math.min(0, Math.max(ch - ih, previewState.ty));
   }
 
   function resetPreviewView() {
     const cw = previewCanvasWrap.clientWidth;
     const ch = previewCanvasWrap.clientHeight;
     previewState.scale = previewState.fitScale;
-    previewState.tx = (cw - previewState.imgW * previewState.scale) / 2;
-    previewState.ty = (ch - previewState.imgH * previewState.scale) / 2;
+    previewState.tx = (cw - previewState.renderW * previewState.scale) / 2;
+    previewState.ty = (ch - previewState.renderH * previewState.scale) / 2;
     clampPreviewPan();
     applyPreviewTransform();
   }
@@ -1698,66 +1825,25 @@
     applyPreviewTransform();
   }
 
-  function openPreview() {
-    if (!state.bgReady || !state.logoReady) return;
-
-    // Remove old canvas
-    if (previewState.imgEl && previewState.imgEl.parentNode) {
-      previewState.imgEl.parentNode.removeChild(previewState.imgEl);
+  function moveLogoTo(x, y) {
+    const maxX = Math.max(0, previewState.renderW - previewState.logoW);
+    const maxY = Math.max(0, previewState.renderH - previewState.logoH);
+    x = Math.min(Math.max(0, x), maxX);
+    y = Math.min(Math.max(0, y), maxY);
+    previewState.logoX = x;
+    previewState.logoY = y;
+    if (previewState.logoImg) {
+      previewState.logoImg.style.left = x + 'px';
+      previewState.logoImg.style.top = y + 'px';
     }
-
-    // Render new canvas
-    const rendered = renderPreviewCanvas();
-    previewCanvasWrap.appendChild(rendered.canvas);
-
-    previewState.imgEl = rendered.canvas;
-    previewState.imgW = rendered.renderW;
-    previewState.imgH = rendered.renderH;
-
-    // Info
-    const cmInfo = state.customSizeCm
-      ? ' · ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + ' سم'
-      : '';
-    const dpiInfo = ' · ' + getCurrentDPI() + ' DPI';
-    previewInfo.textContent = rendered.outW + ' × ' + rendered.outH + ' px' + cmInfo + dpiInfo;
-
-    // Show
-    previewModal.classList.add('show');
-    previewModal.setAttribute('aria-hidden', 'false');
-    previewState.isOpen = true;
-
-    // Force reflow + compute fit
-    void previewCanvasWrap.offsetHeight;
-    computePreviewFit();
-    resetPreviewView();
-
-    // Show hint (only first time per session, or every time - let's do every time)
-    const oldHint = previewCanvasWrap.querySelector('.preview-hint');
-    if (oldHint) oldHint.remove();
-    const hint = document.createElement('div');
-    hint.className = 'preview-hint';
-    hint.textContent = '👆 اسحب للتحريك · اقرص/دوس مرتين للتكبير';
-    previewCanvasWrap.appendChild(hint);
-    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 4200);
   }
 
-  function closePreview() {
-    previewModal.classList.remove('show');
-    previewModal.setAttribute('aria-hidden', 'true');
-    previewState.isOpen = false;
-    // Reset interaction state
-    pvTouchMode = null;
-    pvPanStart = null;
-    pvPinchStart = null;
-    pvMouseDown = false;
-    setTimeout(() => {
-      if (!previewState.isOpen) {
-        if (previewState.imgEl && previewState.imgEl.parentNode) {
-          previewState.imgEl.parentNode.removeChild(previewState.imgEl);
-        }
-        previewState.imgEl = null;
-      }
-    }, 250);
+  function syncLogoToState() {
+    if (previewState.renderW > 0 && previewState.renderH > 0) {
+      state.logoPos.x = previewState.logoX / previewState.renderW;
+      state.logoPos.y = previewState.logoY / previewState.renderH;
+      applyTransforms();
+    }
   }
 
   previewBtn.addEventListener('click', openPreview);
@@ -1781,29 +1867,24 @@
     previewZoomAt(cw / 2, ch / 2, 1 / 1.5);
   });
 
-  // ===== Preview touch handling =====
-  let pvTouchMode = null;
+  // ===== Preview touch =====
+  let pvTouchMode = null; // 'pan' | 'pinch' | 'logo'
   let pvPanStart = null;
   let pvPinchStart = null;
+  let pvLogoStart = null;
   let pvLastTapTime = 0;
   let pvTapPosition = { x: 0, y: 0 };
   let pvTapMoved = false;
+
+  function isOnLogo(target) {
+    return target && target.closest && target.closest('.preview-logo');
+  }
 
   previewCanvasWrap.addEventListener('touchstart', (e) => {
     if (!previewState.isOpen) return;
     e.preventDefault();
 
-    if (e.touches.length === 1) {
-      pvTouchMode = 'pan';
-      pvTapMoved = false;
-      pvTapPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      pvPanStart = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-        tx: previewState.tx,
-        ty: previewState.ty,
-      };
-    } else if (e.touches.length === 2) {
+    if (e.touches.length === 2) {
       pvTouchMode = 'pinch';
       const rect = previewCanvasWrap.getBoundingClientRect();
       const x1 = e.touches[0].clientX - rect.left;
@@ -1820,6 +1901,29 @@
         iy: (cy - previewState.ty) / previewState.scale,
       };
       pvTapMoved = true;
+    } else if (e.touches.length === 1) {
+      if (isOnLogo(e.target)) {
+        pvTouchMode = 'logo';
+        pvLogoStart = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          logoX: previewState.logoX,
+          logoY: previewState.logoY,
+          scale: previewState.scale,
+        };
+        previewState.logoImg.classList.add('dragging');
+        pvTapMoved = true;
+      } else {
+        pvTouchMode = 'pan';
+        pvTapMoved = false;
+        pvTapPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        pvPanStart = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          tx: previewState.tx,
+          ty: previewState.ty,
+        };
+      }
     }
   }, { passive: false });
 
@@ -1827,7 +1931,13 @@
     if (!previewState.isOpen) return;
     e.preventDefault();
 
-    if (pvTouchMode === 'pan' && e.touches.length === 1) {
+    if (pvTouchMode === 'logo' && e.touches.length === 1) {
+      const dxScreen = e.touches[0].clientX - pvLogoStart.x;
+      const dyScreen = e.touches[0].clientY - pvLogoStart.y;
+      const dxRender = dxScreen / pvLogoStart.scale;
+      const dyRender = dyScreen / pvLogoStart.scale;
+      moveLogoTo(pvLogoStart.logoX + dxRender, pvLogoStart.logoY + dyRender);
+    } else if (pvTouchMode === 'pan' && e.touches.length === 1) {
       const dx = e.touches[0].clientX - pvPanStart.x;
       const dy = e.touches[0].clientY - pvPanStart.y;
       if (Math.abs(dx) > 5 || Math.abs(dy) > 5) pvTapMoved = true;
@@ -1858,7 +1968,10 @@
     if (!previewState.isOpen) return;
 
     if (e.touches.length === 0) {
-      if (pvTouchMode === 'pan' && !pvTapMoved) {
+      if (pvTouchMode === 'logo') {
+        syncLogoToState();
+        if (previewState.logoImg) previewState.logoImg.classList.remove('dragging');
+      } else if (pvTouchMode === 'pan' && !pvTapMoved) {
         const now = Date.now();
         if (now - pvLastTapTime < 300) {
           const rect = previewCanvasWrap.getBoundingClientRect();
@@ -1877,51 +1990,87 @@
       pvTouchMode = null;
       pvPanStart = null;
       pvPinchStart = null;
+      pvLogoStart = null;
     } else if (e.touches.length === 1) {
-      pvTouchMode = 'pan';
-      pvPanStart = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-        tx: previewState.tx,
-        ty: previewState.ty,
-      };
+      if (pvTouchMode === 'pinch') {
+        pvTouchMode = 'pan';
+        pvPanStart = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          tx: previewState.tx,
+          ty: previewState.ty,
+        };
+      }
     }
   }, { passive: false });
 
   previewCanvasWrap.addEventListener('touchcancel', () => {
+    if (pvTouchMode === 'logo' && previewState.logoImg) {
+      syncLogoToState();
+      previewState.logoImg.classList.remove('dragging');
+    }
     pvTouchMode = null;
     pvPanStart = null;
     pvPinchStart = null;
+    pvLogoStart = null;
   });
 
-  // ===== Preview mouse handling =====
-  let pvMouseDown = false;
+  // ===== Preview mouse =====
+  let pvMouseMode = null;
   let pvMouseStart = null;
 
   previewCanvasWrap.addEventListener('mousedown', (e) => {
     if (!previewState.isOpen) return;
     if (e.button !== 0) return;
-    pvMouseDown = true;
-    pvMouseStart = {
-      x: e.clientX,
-      y: e.clientY,
-      tx: previewState.tx,
-      ty: previewState.ty,
-    };
+
+    if (isOnLogo(e.target)) {
+      pvMouseMode = 'logo';
+      pvMouseStart = {
+        x: e.clientX,
+        y: e.clientY,
+        logoX: previewState.logoX,
+        logoY: previewState.logoY,
+        scale: previewState.scale,
+      };
+      previewState.logoImg.classList.add('dragging');
+      e.preventDefault();
+    } else {
+      pvMouseMode = 'pan';
+      pvMouseStart = {
+        x: e.clientX,
+        y: e.clientY,
+        tx: previewState.tx,
+        ty: previewState.ty,
+      };
+    }
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (!pvMouseDown || !previewState.isOpen) return;
-    const dx = e.clientX - pvMouseStart.x;
-    const dy = e.clientY - pvMouseStart.y;
-    previewState.tx = pvMouseStart.tx + dx;
-    previewState.ty = pvMouseStart.ty + dy;
-    clampPreviewPan();
-    applyPreviewTransform();
+    if (!previewState.isOpen || !pvMouseMode) return;
+    if (pvMouseMode === 'logo') {
+      const dxScreen = e.clientX - pvMouseStart.x;
+      const dyScreen = e.clientY - pvMouseStart.y;
+      const dxRender = dxScreen / pvMouseStart.scale;
+      const dyRender = dyScreen / pvMouseStart.scale;
+      moveLogoTo(pvMouseStart.logoX + dxRender, pvMouseStart.logoY + dyRender);
+    } else if (pvMouseMode === 'pan') {
+      const dx = e.clientX - pvMouseStart.x;
+      const dy = e.clientY - pvMouseStart.y;
+      previewState.tx = pvMouseStart.tx + dx;
+      previewState.ty = pvMouseStart.ty + dy;
+      clampPreviewPan();
+      applyPreviewTransform();
+    }
   });
 
   window.addEventListener('mouseup', () => {
-    pvMouseDown = false;
+    if (!previewState.isOpen) return;
+    if (pvMouseMode === 'logo') {
+      syncLogoToState();
+      if (previewState.logoImg) previewState.logoImg.classList.remove('dragging');
+    }
+    pvMouseMode = null;
+    pvMouseStart = null;
   });
 
   previewCanvasWrap.addEventListener('wheel', (e) => {
@@ -1934,7 +2083,7 @@
     previewZoomAt(px, py, factor);
   }, { passive: false });
 
-  // ===== Global Escape =====
+  // ===== Escape =====
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (previewState.isOpen) closePreview();
@@ -1942,7 +2091,7 @@
     }
   });
 
-  // ===== Drag logo =====
+  // ===== Drag logo (main stage) =====
   let dragging = false;
   let dragStart = { x: 0, y: 0 };
   let logoStart = { px: 0, py: 0 };
@@ -2007,7 +2156,6 @@
     if (dragging) e.preventDefault();
   }, { passive: false });
 
-  // ===== Stage click → size modal =====
   stage.addEventListener('click', (e) => {
     if (Date.now() - logoDragEndedAt < 300) return;
     if (e.target.closest('#logo')) return;
