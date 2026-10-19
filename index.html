@@ -36,7 +36,6 @@
     height: 100dvh;
   }
 
-  /* ===== Header ===== */
   header {
     background: linear-gradient(135deg, var(--blue-dark), var(--blue));
     color: var(--white);
@@ -53,7 +52,6 @@
     letter-spacing: 0.3px;
   }
 
-  /* ===== Canvas Area ===== */
   .canvas-area {
     flex: 1;
     position: relative;
@@ -101,7 +99,6 @@
     cursor: grabbing;
   }
 
-  /* Empty state */
   #emptyState {
     position: absolute;
     inset: 0;
@@ -131,7 +128,6 @@
     opacity: 0.6;
   }
 
-  /* ===== Controls ===== */
   .controls {
     background: var(--white);
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
@@ -140,7 +136,7 @@
     flex-direction: column;
     gap: 10px;
     flex-shrink: 0;
-    max-height: 52vh;
+    max-height: 55vh;
     overflow-y: auto;
   }
 
@@ -199,7 +195,6 @@
     display: none !important;
   }
 
-  /* Size control */
   .size-control {
     display: flex;
     align-items: center;
@@ -260,7 +255,6 @@
     border-radius: 8px;
   }
 
-  /* Quality control */
   .quality-control {
     display: flex;
     align-items: center;
@@ -307,7 +301,6 @@
     box-shadow: 0 2px 6px rgba(10, 77, 140, 0.35);
   }
 
-  /* Info bar */
   .info-bar {
     display: flex;
     justify-content: center;
@@ -329,7 +322,6 @@
     font-weight: 700;
   }
 
-  /* Hidden inputs */
   .hidden-input {
     position: absolute;
     width: 1px;
@@ -338,7 +330,6 @@
     pointer-events: none;
   }
 
-  /* Toast */
   #toast {
     position: fixed;
     bottom: 140px;
@@ -364,7 +355,6 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Loading overlay */
   #loading {
     position: fixed;
     inset: 0;
@@ -455,6 +445,20 @@
       </div>
     </div>
 
+    <div class="quality-control">
+      <label>الصيغة</label>
+      <div class="segmented" id="formatSegmented">
+        <button data-format="png" class="active">PNG</button>
+        <button data-format="jpeg">JPEG</button>
+      </div>
+    </div>
+
+    <div class="size-control" id="jpegQualityRow" style="display:none;">
+      <label>جودة JPEG</label>
+      <input type="range" id="jpegQuality" dir="ltr" min="70" max="100" value="95">
+      <span class="size-value" id="jpegQualityValue">95%</span>
+    </div>
+
     <button class="btn btn-primary" id="downloadBtn" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -467,6 +471,7 @@
     <div class="info-bar" id="infoBar" style="display:none;">
       <span>📐 <b id="infoDim">-</b></span>
       <span id="infoQuality">🎯 دقة أصلية</span>
+      <span id="infoFormat">📄 PNG</span>
     </div>
   </div>
 </div>
@@ -483,7 +488,6 @@
 (function() {
   'use strict';
 
-  // ===== Elements =====
   const stage = document.getElementById('stage');
   const bgImage = document.getElementById('bgImage');
   const logo = document.getElementById('logo');
@@ -499,23 +503,28 @@
   const infoBar = document.getElementById('infoBar');
   const infoDim = document.getElementById('infoDim');
   const infoQuality = document.getElementById('infoQuality');
+  const infoFormat = document.getElementById('infoFormat');
   const qualitySegmented = document.getElementById('qualitySegmented');
+  const formatSegmented = document.getElementById('formatSegmented');
+  const jpegQualityRow = document.getElementById('jpegQualityRow');
+  const jpegQuality = document.getElementById('jpegQuality');
+  const jpegQualityValue = document.getElementById('jpegQualityValue');
   const toast = document.getElementById('toast');
   const loading = document.getElementById('loading');
   const canvasArea = document.getElementById('canvasArea');
 
-  // ===== State =====
   const state = {
     bgNatural: { w: 0, h: 0 },
     logoNatural: { w: 0, h: 0 },
     logoScalePct: 30,
     logoPos: { x: 0.1, y: 0.1 },
     qualityMult: 1,
+    format: 'png',
+    jpegQuality: 0.95,
     bgReady: false,
     logoReady: false,
   };
 
-  // ===== Toast =====
   let toastTimer;
   function showToast(msg, duration = 2200) {
     toast.textContent = msg;
@@ -524,12 +533,10 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
   }
 
-  // ===== Download enable helper =====
   function maybeEnableDownload() {
     downloadBtn.disabled = !(state.bgReady && state.logoReady);
   }
 
-  // ===== Apply loaded logo =====
   function applyLogoImage(src) {
     return new Promise((resolve, reject) => {
       const probe = new Image();
@@ -539,7 +546,6 @@
         logo.style.display = 'block';
         state.logoReady = true;
         sizeSlider.disabled = false;
-        // Hide manual picker when auto-logo works
         chooseLogoBtn.hidden = true;
         if (logoHint) logoHint.textContent = 'اللوجو جاهز ✓';
         applyTransforms();
@@ -551,9 +557,7 @@
     });
   }
 
-  // ===== Auto-load logo.png =====
   async function tryAutoLoadLogo() {
-    // 1) Try fetch first (best for http — creates blob URL)
     try {
       const resp = await fetch('logo.png', { cache: 'no-cache' });
       if (resp.ok) {
@@ -563,24 +567,19 @@
         showToast('تم تحميل logo.png تلقائياً ✓');
         return;
       }
-    } catch (e) {
-      // fetch failed (file://) — fall through to direct src
-    }
+    } catch (e) {}
 
-    // 2) Try direct src load (works on file:// in some browsers)
     try {
       await applyLogoImage('logo.png');
       showToast('تم تحميل logo.png تلقائياً ✓');
       return;
     } catch (e) {
-      // 3) Auto-load failed — show manual picker
       chooseLogoBtn.hidden = false;
       if (logoHint) logoHint.textContent = 'مش لاقي logo.png — اختار اللوجو يدوياً';
       showToast('⚠️ مش لاقي logo.png — اختار اللوجو يدوياً', 4000);
     }
   }
 
-  // ===== Manual logo picker =====
   chooseLogoBtn.addEventListener('click', () => logoInput.click());
 
   logoInput.addEventListener('change', (e) => {
@@ -596,7 +595,6 @@
     e.target.value = '';
   });
 
-  // ===== Upload background =====
   uploadBgBtn.addEventListener('click', () => bgInput.click());
 
   bgInput.addEventListener('change', (e) => {
@@ -625,7 +623,6 @@
     e.target.value = '';
   });
 
-  // ===== Fit stage to viewport =====
   function fitStageToViewport() {
     if (!state.bgReady) return;
 
@@ -651,7 +648,6 @@
     applyTransforms();
   }
 
-  // ===== Apply logo transform =====
   function applyTransforms() {
     if (!state.bgReady || !state.logoReady) return;
 
@@ -678,7 +674,6 @@
     logo.style.top = py + 'px';
   }
 
-  // ===== Size slider =====
   sizeSlider.addEventListener('input', (e) => {
     state.logoScalePct = parseFloat(e.target.value);
     sizeValue.textContent = state.logoScalePct + '%';
@@ -695,7 +690,6 @@
   }
   updateSliderFill();
 
-  // ===== Quality segmented =====
   qualitySegmented.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
       qualitySegmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -705,7 +699,33 @@
     });
   });
 
-  // ===== Info bar =====
+  // ===== Format segmented =====
+  formatSegmented.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      formatSegmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.format = btn.dataset.format;
+      jpegQualityRow.style.display = (state.format === 'jpeg') ? 'flex' : 'none';
+      updateInfo();
+    });
+  });
+
+  // ===== JPEG quality slider =====
+  function updateJpegFill() {
+    const min = parseFloat(jpegQuality.min);
+    const max = parseFloat(jpegQuality.max);
+    const val = parseFloat(jpegQuality.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    jpegQuality.style.setProperty('--fill', pct + '%');
+  }
+  jpegQuality.addEventListener('input', (e) => {
+    const v = parseFloat(e.target.value);
+    state.jpegQuality = v / 100;
+    jpegQualityValue.textContent = v + '%';
+    updateJpegFill();
+  });
+  updateJpegFill();
+
   function updateInfo() {
     if (!state.bgReady) {
       infoBar.style.display = 'none';
@@ -719,6 +739,7 @@
     } else {
       infoQuality.textContent = '🎯 طباعة ×' + state.qualityMult;
     }
+    infoFormat.textContent = '📄 ' + state.format.toUpperCase();
     infoBar.style.display = 'flex';
   }
 
@@ -788,7 +809,6 @@
     if (dragging) e.preventDefault();
   }, { passive: false });
 
-  // ===== Resize =====
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -828,6 +848,12 @@
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
+      // JPEG doesn't support transparency — fill white first
+      if (state.format === 'jpeg') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+      }
+
       ctx.drawImage(bgImage, 0, 0, W, H);
 
       const stageW = stage.clientWidth;
@@ -847,9 +873,15 @@
 
       ctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
-      let dataURL;
+      let dataURL, ext;
       try {
-        dataURL = canvas.toDataURL('image/png');
+        if (state.format === 'jpeg') {
+          dataURL = canvas.toDataURL('image/jpeg', state.jpegQuality);
+          ext = 'jpg';
+        } else {
+          dataURL = canvas.toDataURL('image/png');
+          ext = 'png';
+        }
       } catch (secErr) {
         if (secErr.name === 'SecurityError') {
           throw new Error('SECURITY');
@@ -859,13 +891,13 @@
 
       const a = document.createElement('a');
       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      a.download = 'image-with-logo-' + W + 'x' + H + '-' + ts + '.png';
+      a.download = 'image-with-logo-' + W + 'x' + H + '-' + ts + '.' + ext;
       a.href = dataURL;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
-      showToast('تم التنزيل ✓ ' + W + '×' + H, 3000);
+      showToast('تم التنزيل ✓ ' + W + '×' + H + ' (' + ext.toUpperCase() + ')', 3000);
     } catch (err) {
       console.error(err);
       if (err.message === 'SECURITY') {
@@ -878,7 +910,6 @@
     }
   });
 
-  // ===== Init =====
   tryAutoLoadLogo();
 })();
 </script>
