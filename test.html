@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>محرر اللوجو على الصورة</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :root {
+    --blue: #0a4d8c;
+    --blue-light: #1e6fbf;
+    --blue-dark: #06345e;
+    --white: #ffffff;
+    --bg: #f0f4f8;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--blue-dark);
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* ===== Header ===== */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+    color: var(--white);
+    padding: 12px 16px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(10, 77, 140, 0.3);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  /* ===== Canvas Area ===== */
+  .canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #d9e2ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    min-height: 0;
+  }
+
+  #stage {
+    position: relative;
+    box-shadow: 0 4px 20px rgba(6, 52, 94, 0.25);
+    background: #fff;
+    touch-action: none;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  #bgImage {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  #logo {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: center center;
+    will-change: transform, left, top;
+    filter: drop-shadow(0 2px 6px rgba(6, 52, 94, 0.25));
+  }
+
+  #logo:active {
+    cursor: grabbing;
+  }
+
+  /* Empty state */
+  #emptyState {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--blue);
+    text-align: center;
+    padding: 20px;
+  }
+
+  #emptyState svg {
+    width: 60px;
+    height: 60px;
+    opacity: 0.6;
+  }
+
+  #emptyState p {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  #emptyState small {
+    font-size: 11px;
+    opacity: 0.6;
+  }
+
+  /* ===== Controls ===== */
+  .controls {
+    background: var(--white);
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -3px 15px rgba(6, 52, 94, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    max-height: 52vh;
+    overflow-y: auto;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+  }
+
+  .btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: var(--white);
+    box-shadow: 0 3px 10px rgba(10, 77, 140, 0.3);
+  }
+
+  .btn-outline {
+    background: var(--white);
+    color: var(--blue);
+    border: 2px solid var(--blue);
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn[hidden] {
+    display: none !important;
+  }
+
+  /* Size control */
+  .size-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+
+  .size-control label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+
+  .size-control input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--blue) var(--fill, 0%), #c5d5e5 var(--fill, 0%));
+    outline: none;
+    direction: ltr;
+  }
+
+  .size-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--blue);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(6, 52, 94, 0.3);
+  }
+
+  .size-control input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--blue);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(6, 52, 94, 0.3);
+  }
+
+  .size-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    min-width: 42px;
+    text-align: center;
+    background: var(--white);
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+
+  /* Quality control */
+  .quality-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 8px 10px 8px 14px;
+  }
+
+  .quality-control > label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+
+  .segmented {
+    flex: 1;
+    display: flex;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .segmented button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--blue);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .segmented button.active {
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: var(--white);
+    box-shadow: 0 2px 6px rgba(10, 77, 140, 0.35);
+  }
+
+  /* Info bar */
+  .info-bar {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--blue);
+    opacity: 0.8;
+    padding: 2px 4px;
+    flex-wrap: wrap;
+  }
+
+  .info-bar span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .info-bar b {
+    font-weight: 700;
+  }
+
+  /* Hidden inputs */
+  .hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 140px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--blue-dark);
+    color: var(--white);
+    padding: 11px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Loading overlay */
+  #loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 52, 94, 0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 200;
+    color: var(--white);
+    font-weight: 600;
+    padding: 20px;
+    text-align: center;
+  }
+
+  #loading.show {
+    display: flex;
+  }
+
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(255,255,255,0.25);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>✨ محرر اللوجو على الصورة</h1>
+  </header>
+
+  <div class="canvas-area" id="canvasArea">
+    <div id="stage">
+      <img id="bgImage" alt="الصورة" style="display:none;">
+      <img id="logo" alt="اللوجو" style="display:none;">
+      <div id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <p>اضغط "رفع الصورة" عشان تبدأ</p>
+        <small id="logoHint">جاري تحميل logo.png تلقائياً...</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-outline" id="uploadBgBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      رفع الصورة الأصلية
+    </button>
+
+    <button class="btn btn-outline" id="chooseLogoBtn" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v10M7 12h10"/>
+      </svg>
+      اختيار اللوجو يدوياً
+    </button>
+
+    <div class="size-control">
+      <label>حجم اللوجو</label>
+      <input type="range" id="sizeSlider" dir="ltr" min="5" max="200" value="30" disabled>
+      <span class="size-value" id="sizeValue">30%</span>
+    </div>
+
+    <div class="quality-control">
+      <label>جودة الطباعة</label>
+      <div class="segmented" id="qualitySegmented">
+        <button data-mult="1" class="active">عادي</button>
+        <button data-mult="2">×2</button>
+        <button data-mult="3">×3</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="downloadBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      تنزيل الصورة
+    </button>
+
+    <div class="info-bar" id="infoBar" style="display:none;">
+      <span>📐 <b id="infoDim">-</b></span>
+      <span id="infoQuality">🎯 دقة أصلية</span>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="bgInput" accept="image/*" class="hidden-input">
+<input type="file" id="logoInput" accept="image/*" class="hidden-input">
+<div id="toast"></div>
+<div id="loading">
+  <div class="spinner"></div>
+  <span>جاري تجهيز الصورة...</span>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ===== Elements =====
+  const stage = document.getElementById('stage');
+  const bgImage = document.getElementById('bgImage');
+  const logo = document.getElementById('logo');
+  const emptyState = document.getElementById('emptyState');
+  const logoHint = document.getElementById('logoHint');
+  const bgInput = document.getElementById('bgInput');
+  const logoInput = document.getElementById('logoInput');
+  const uploadBgBtn = document.getElementById('uploadBgBtn');
+  const chooseLogoBtn = document.getElementById('chooseLogoBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const sizeSlider = document.getElementById('sizeSlider');
+  const sizeValue = document.getElementById('sizeValue');
+  const infoBar = document.getElementById('infoBar');
+  const infoDim = document.getElementById('infoDim');
+  const infoQuality = document.getElementById('infoQuality');
+  const qualitySegmented = document.getElementById('qualitySegmented');
+  const toast = document.getElementById('toast');
+  const loading = document.getElementById('loading');
+  const canvasArea = document.getElementById('canvasArea');
+
+  // ===== State =====
+  const state = {
+    bgNatural: { w: 0, h: 0 },
+    logoNatural: { w: 0, h: 0 },
+    logoScalePct: 30,
+    logoPos: { x: 0.1, y: 0.1 },
+    qualityMult: 1,
+    bgReady: false,
+    logoReady: false,
+  };
+
+  // ===== Toast =====
+  let toastTimer;
+  function showToast(msg, duration = 2200) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+  }
+
+  // ===== Download enable helper =====
+  function maybeEnableDownload() {
+    downloadBtn.disabled = !(state.bgReady && state.logoReady);
+  }
+
+  // ===== Apply loaded logo =====
+  function applyLogoImage(src) {
+    return new Promise((resolve, reject) => {
+      const probe = new Image();
+      probe.onload = () => {
+        state.logoNatural = { w: probe.naturalWidth, h: probe.naturalHeight };
+        logo.src = src;
+        logo.style.display = 'block';
+        state.logoReady = true;
+        sizeSlider.disabled = false;
+        // Hide manual picker when auto-logo works
+        chooseLogoBtn.hidden = true;
+        if (logoHint) logoHint.textContent = 'اللوجو جاهز ✓';
+        applyTransforms();
+        maybeEnableDownload();
+        resolve();
+      };
+      probe.onerror = () => reject(new Error('LOGO_LOAD_FAIL'));
+      probe.src = src;
+    });
+  }
+
+  // ===== Auto-load logo.png =====
+  async function tryAutoLoadLogo() {
+    // 1) Try fetch first (best for http — creates blob URL)
+    try {
+      const resp = await fetch('logo.png', { cache: 'no-cache' });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        await applyLogoImage(url);
+        showToast('تم تحميل logo.png تلقائياً ✓');
+        return;
+      }
+    } catch (e) {
+      // fetch failed (file://) — fall through to direct src
+    }
+
+    // 2) Try direct src load (works on file:// in some browsers)
+    try {
+      await applyLogoImage('logo.png');
+      showToast('تم تحميل logo.png تلقائياً ✓');
+      return;
+    } catch (e) {
+      // 3) Auto-load failed — show manual picker
+      chooseLogoBtn.hidden = false;
+      if (logoHint) logoHint.textContent = 'مش لاقي logo.png — اختار اللوجو يدوياً';
+      showToast('⚠️ مش لاقي logo.png — اختار اللوجو يدوياً', 4000);
+    }
+  }
+
+  // ===== Manual logo picker =====
+  chooseLogoBtn.addEventListener('click', () => logoInput.click());
+
+  logoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    applyLogoImage(url).then(() => {
+      showToast('تم تحميل اللوجو ✓');
+    }).catch(() => {
+      showToast('خطأ في تحميل اللوجو');
+      URL.revokeObjectURL(url);
+    });
+    e.target.value = '';
+  });
+
+  // ===== Upload background =====
+  uploadBgBtn.addEventListener('click', () => bgInput.click());
+
+  bgInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      state.bgNatural = { w: img.naturalWidth, h: img.naturalHeight };
+      bgImage.src = url;
+      bgImage.style.display = 'block';
+      emptyState.style.display = 'none';
+      state.bgReady = true;
+      fitStageToViewport();
+      updateInfo();
+      applyTransforms();
+      maybeEnableDownload();
+      URL.revokeObjectURL(url);
+      showToast('تم تحميل الصورة ✓');
+    };
+    img.onerror = () => {
+      showToast('خطأ في تحميل الصورة');
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    e.target.value = '';
+  });
+
+  // ===== Fit stage to viewport =====
+  function fitStageToViewport() {
+    if (!state.bgReady) return;
+
+    const areaRect = canvasArea.getBoundingClientRect();
+    const availW = areaRect.width - 20;
+    const availH = areaRect.height - 20;
+
+    const bgRatio = state.bgNatural.w / state.bgNatural.h;
+    let dispW = availW;
+    let dispH = dispW / bgRatio;
+    if (dispH > availH) {
+      dispH = availH;
+      dispW = dispH * bgRatio;
+    }
+    dispW = Math.max(1, Math.floor(dispW));
+    dispH = Math.max(1, Math.floor(dispH));
+
+    stage.style.width = dispW + 'px';
+    stage.style.height = dispH + 'px';
+    bgImage.style.width = '100%';
+    bgImage.style.height = '100%';
+
+    applyTransforms();
+  }
+
+  // ===== Apply logo transform =====
+  function applyTransforms() {
+    if (!state.bgReady || !state.logoReady) return;
+
+    const stageW = stage.clientWidth;
+    const stageH = stage.clientHeight;
+    if (stageW === 0 || stageH === 0) return;
+
+    const targetW = stageW * (state.logoScalePct / 100);
+    const targetH = targetW * (state.logoNatural.h / state.logoNatural.w);
+
+    logo.style.width = targetW + 'px';
+    logo.style.height = targetH + 'px';
+
+    const maxX = Math.max(0, stageW - targetW);
+    const maxY = Math.max(0, stageH - targetH);
+    let px = state.logoPos.x * stageW;
+    let py = state.logoPos.y * stageH;
+    px = Math.min(Math.max(0, px), maxX);
+    py = Math.min(Math.max(0, py), maxY);
+    state.logoPos.x = stageW > 0 ? px / stageW : 0;
+    state.logoPos.y = stageH > 0 ? py / stageH : 0;
+
+    logo.style.left = px + 'px';
+    logo.style.top = py + 'px';
+  }
+
+  // ===== Size slider =====
+  sizeSlider.addEventListener('input', (e) => {
+    state.logoScalePct = parseFloat(e.target.value);
+    sizeValue.textContent = state.logoScalePct + '%';
+    updateSliderFill();
+    applyTransforms();
+  });
+
+  function updateSliderFill() {
+    const min = parseFloat(sizeSlider.min);
+    const max = parseFloat(sizeSlider.max);
+    const val = parseFloat(sizeSlider.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    sizeSlider.style.setProperty('--fill', pct + '%');
+  }
+  updateSliderFill();
+
+  // ===== Quality segmented =====
+  qualitySegmented.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      qualitySegmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.qualityMult = parseInt(btn.dataset.mult, 10);
+      updateInfo();
+    });
+  });
+
+  // ===== Info bar =====
+  function updateInfo() {
+    if (!state.bgReady) {
+      infoBar.style.display = 'none';
+      return;
+    }
+    const w = state.bgNatural.w * state.qualityMult;
+    const h = state.bgNatural.h * state.qualityMult;
+    infoDim.textContent = w + ' × ' + h;
+    if (state.qualityMult === 1) {
+      infoQuality.textContent = '🎯 دقة أصلية';
+    } else {
+      infoQuality.textContent = '🎯 طباعة ×' + state.qualityMult;
+    }
+    infoBar.style.display = 'flex';
+  }
+
+  // ===== Drag logo =====
+  let dragging = false;
+  let dragStart = { x: 0, y: 0 };
+  let logoStart = { px: 0, py: 0 };
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function startDrag(e) {
+    if (!state.logoReady) return;
+    e.preventDefault();
+    dragging = true;
+    const p = getPoint(e);
+    dragStart = p;
+    logoStart = {
+      px: parseFloat(logo.style.left) || 0,
+      py: parseFloat(logo.style.top) || 0
+    };
+    logo.style.cursor = 'grabbing';
+  }
+
+  function moveDrag(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    const p = getPoint(e);
+    const dx = p.x - dragStart.x;
+    const dy = p.y - dragStart.y;
+
+    const stageW = stage.clientWidth;
+    const stageH = stage.clientHeight;
+    const logoW = parseFloat(logo.style.width) || 0;
+    const logoH = parseFloat(logo.style.height) || 0;
+    const maxX = Math.max(0, stageW - logoW);
+    const maxY = Math.max(0, stageH - logoH);
+
+    let newX = Math.min(Math.max(0, logoStart.px + dx), maxX);
+    let newY = Math.min(Math.max(0, logoStart.py + dy), maxY);
+
+    logo.style.left = newX + 'px';
+    logo.style.top = newY + 'px';
+    state.logoPos.x = stageW > 0 ? newX / stageW : 0;
+    state.logoPos.y = stageH > 0 ? newY / stageH : 0;
+  }
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    logo.style.cursor = 'grab';
+  }
+
+  logo.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', moveDrag);
+  document.addEventListener('mouseup', endDrag);
+  logo.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener('touchmove', moveDrag, { passive: false });
+  document.addEventListener('touchend', endDrag);
+  document.addEventListener('touchcancel', endDrag);
+
+  canvasArea.addEventListener('touchmove', (e) => {
+    if (dragging) e.preventDefault();
+  }, { passive: false });
+
+  // ===== Resize =====
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fitStageToViewport, 150);
+  });
+
+  // ===== Export =====
+  downloadBtn.addEventListener('click', async () => {
+    if (!state.bgReady || !state.logoReady) return;
+
+    loading.classList.add('show');
+
+    try {
+      await new Promise(r => setTimeout(r, 60));
+
+      const mult = state.qualityMult;
+      const W = state.bgNatural.w * mult;
+      const H = state.bgNatural.h * mult;
+
+      const MAX_DIM = 16000;
+      const MAX_PIXELS = 100000000;
+      if (W > MAX_DIM || H > MAX_DIM) {
+        showToast('⚠️ الصورة كبيرة جداً — اختر جودة أقل', 4000);
+        loading.classList.remove('show');
+        return;
+      }
+      if (W * H > MAX_PIXELS) {
+        showToast('⚠️ الصورة كبيرة جداً — اختر ×2 أو عادي', 4000);
+        loading.classList.remove('show');
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      ctx.drawImage(bgImage, 0, 0, W, H);
+
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      const logoXscreen = parseFloat(logo.style.left) || 0;
+      const logoYscreen = parseFloat(logo.style.top) || 0;
+      const logoWscreen = parseFloat(logo.style.width) || 0;
+      const logoHscreen = parseFloat(logo.style.height) || 0;
+
+      const scaleX = W / stageW;
+      const scaleY = H / stageH;
+
+      const logoX = logoXscreen * scaleX;
+      const logoY = logoYscreen * scaleY;
+      const logoW = logoWscreen * scaleX;
+      const logoH = logoHscreen * scaleY;
+
+      ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+
+      let dataURL;
+      try {
+        dataURL = canvas.toDataURL('image/png');
+      } catch (secErr) {
+        if (secErr.name === 'SecurityError') {
+          throw new Error('SECURITY');
+        }
+        throw secErr;
+      }
+
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      a.download = 'image-with-logo-' + W + 'x' + H + '-' + ts + '.png';
+      a.href = dataURL;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      showToast('تم التنزيل ✓ ' + W + '×' + H, 3000);
+    } catch (err) {
+      console.error(err);
+      if (err.message === 'SECURITY') {
+        showToast('⚠️ المتصفح منع التصدير — شغّل الصفحة عبر سيرفر محلي (python -m http.server)', 6000);
+      } else {
+        showToast('حدث خطأ أثناء التصدير', 4000);
+      }
+    } finally {
+      setTimeout(() => loading.classList.remove('show'), 400);
+    }
+  });
+
+  // ===== Init =====
+  tryAutoLoadLogo();
+})();
+</script>
+</body>
+</html>
