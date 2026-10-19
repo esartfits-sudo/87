@@ -305,14 +305,20 @@
     font-weight: 500;
   }
 
-  /* Filename input */
+  /* ===== Filename input (enhanced) ===== */
   .filename-control {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
     background: var(--bg);
     border-radius: 12px;
-    padding: 8px 10px 8px 14px;
+    padding: 10px 12px;
+  }
+
+  .filename-control .filename-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .filename-control label {
@@ -322,30 +328,92 @@
     white-space: nowrap;
   }
 
-  .filename-control input {
+  .filename-input-wrap {
     flex: 1;
-    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
     background: var(--white);
+    border: 2px solid transparent;
     border-radius: 8px;
-    padding: 8px 10px;
+    padding: 0 6px 0 0;
+    transition: border-color 0.15s;
+    min-width: 0;
+  }
+
+  .filename-input-wrap:focus-within {
+    border-color: var(--blue);
+  }
+
+  .filename-input-wrap input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 8px 0 0 8px;
+    padding: 9px 10px;
     font-size: 13px;
     font-family: inherit;
     color: var(--blue-dark);
     font-weight: 600;
     outline: none;
-    transition: border-color 0.15s;
     direction: ltr;
     text-align: left;
     min-width: 0;
   }
 
-  .filename-control input:focus {
-    border-color: var(--blue);
-  }
-
-  .filename-control input::placeholder {
+  .filename-input-wrap input::placeholder {
     color: #a0b0c0;
     font-weight: 500;
+  }
+
+  .ext-badge {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--blue);
+    background: rgba(10, 77, 140, 0.08);
+    padding: 5px 9px;
+    border-radius: 6px;
+    direction: ltr;
+    letter-spacing: 0.5px;
+    user-select: none;
+  }
+
+  .filename-reset {
+    border: none;
+    background: rgba(10, 77, 140, 0.08);
+    color: var(--blue);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.12s;
+    flex-shrink: 0;
+  }
+
+  .filename-reset:active {
+    transform: scale(0.92);
+    background: rgba(10, 77, 140, 0.18);
+  }
+
+  .filename-preview {
+    font-size: 11px;
+    color: var(--blue);
+    opacity: 0.75;
+    padding: 2px 2px 0;
+    direction: ltr;
+    text-align: left;
+    word-break: break-all;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  .filename-preview b {
+    font-weight: 800;
+    opacity: 1;
+    color: var(--blue-dark);
   }
 
   .info-bar {
@@ -506,9 +574,17 @@
       <span class="size-value" id="jpegQualityValue">95%</span>
     </div>
 
+    <!-- ===== اسم الملف (محسّن) ===== -->
     <div class="filename-control">
-      <label for="filenameInput">اسم الملف</label>
-      <input type="text" id="filenameInput" value="image-with-logo" maxlength="100" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
+      <div class="filename-row">
+        <label for="filenameInput">اسم الملف</label>
+        <div class="filename-input-wrap">
+          <input type="text" id="filenameInput" value="image-with-logo" maxlength="80" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
+          <span class="ext-badge" id="extBadge">.png</span>
+        </div>
+        <button type="button" class="filename-reset" id="filenameReset" title="استرجاع الاسم الافتراضي" aria-label="استرجاع الاسم الافتراضي">↺</button>
+      </div>
+      <div class="filename-preview" id="filenamePreview">سيتم التنزيل باسم: <b>image-with-logo.png</b></div>
     </div>
 
     <button class="btn btn-primary" id="downloadBtn" disabled>
@@ -562,10 +638,15 @@
   const jpegQuality = document.getElementById('jpegQuality');
   const jpegQualityValue = document.getElementById('jpegQualityValue');
   const filenameInput = document.getElementById('filenameInput');
+  const extBadge = document.getElementById('extBadge');
+  const filenamePreview = document.getElementById('filenamePreview');
+  const filenameReset = document.getElementById('filenameReset');
   const toast = document.getElementById('toast');
   const loading = document.getElementById('loading');
   const loadingText = document.getElementById('loadingText');
   const canvasArea = document.getElementById('canvasArea');
+
+  const DEFAULT_FILENAME = 'image-with-logo';
 
   const state = {
     bgNatural: { w: 0, h: 0 },
@@ -591,6 +672,44 @@
     downloadBtn.disabled = !(state.bgReady && state.logoReady);
   }
 
+  // ===== Filename helpers =====
+  function getExtension() {
+    return state.format === 'jpeg' ? 'jpg' : 'png';
+  }
+
+  function sanitizeFilename(name) {
+    let clean = (name || '').trim();
+    // Remove extension if user typed one
+    clean = clean.replace(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/i, '');
+    // Replace invalid filename characters
+    clean = clean.replace(/[\/\\:*?"<>|]/g, '-');
+    // Collapse repeated dashes/spaces
+    clean = clean.replace(/[\s\-]+/g, '-');
+    // Remove leading/trailing dashes and dots
+    clean = clean.replace(/^[\-.]+|[\-.]+$/g, '');
+    // Limit length
+    clean = clean.substring(0, 80);
+    return clean || DEFAULT_FILENAME;
+  }
+
+  function updateFilenameUI() {
+    const ext = getExtension();
+    extBadge.textContent = '.' + ext;
+
+    const rawName = filenameInput.value;
+    const cleanName = sanitizeFilename(rawName);
+    const finalName = cleanName + '.' + ext;
+    filenamePreview.innerHTML = 'سيتم التنزيل باسم: <b>' + finalName + '</b>';
+  }
+
+  filenameInput.addEventListener('input', updateFilenameUI);
+  filenameReset.addEventListener('click', () => {
+    filenameInput.value = DEFAULT_FILENAME;
+    updateFilenameUI();
+    filenameInput.focus();
+  });
+
+  // ===== Logo loading =====
   function applyLogoImage(src) {
     return new Promise((resolve, reject) => {
       const probe = new Image();
@@ -760,6 +879,7 @@
       state.format = btn.dataset.format;
       jpegQualityRow.style.display = (state.format === 'jpeg') ? 'flex' : 'none';
       updateInfo();
+      updateFilenameUI();
     });
   });
 
@@ -870,31 +990,13 @@
     resizeTimer = setTimeout(fitStageToViewport, 150);
   });
 
-  // ===== Filename sanitization =====
-  function sanitizeFilename(name) {
-    let clean = (name || '').trim();
-    // Remove extension if user typed one
-    clean = clean.replace(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/i, '');
-    // Replace invalid filename characters with dashes
-    clean = clean.replace(/[\/\\:*?"<>|.]/g, '-');
-    // Collapse repeated dashes/spaces
-    clean = clean.replace(/[\s\-]+/g, '-');
-    // Remove leading/trailing dashes
-    clean = clean.replace(/^-+|-+$/g, '');
-    // Limit length
-    clean = clean.substring(0, 80);
-    return clean || 'image-with-logo';
-  }
-
   // ===== Sharpen (unsharp mask) =====
-  // Returns true if sharpening applied, false if skipped (too large / tainted / error)
   function trySharpen(canvas, amount) {
     try {
       const w = canvas.width;
       const h = canvas.height;
       const pixels = w * h;
 
-      // Safety: skip if image is too large for mobile memory
       if (pixels > 15000000) {
         console.warn('Image too large for sharpening (' + pixels + ' px), skipping');
         return false;
@@ -902,7 +1004,6 @@
 
       const ctx = canvas.getContext('2d');
 
-      // Create blurred version
       const blurCanvas = document.createElement('canvas');
       blurCanvas.width = w;
       blurCanvas.height = h;
@@ -914,7 +1015,6 @@
       const bd = bctx.getImageData(0, 0, w, h).data;
       const od = orig.data;
 
-      // Unsharp mask: result = orig + (orig - blur) * amount
       for (let i = 0; i < od.length; i += 4) {
         const dr = od[i] - bd[i];
         const dg = od[i + 1] - bd[i + 1];
@@ -953,7 +1053,6 @@
       const outW = nativeW * mult;
       const outH = nativeH * mult;
 
-      // Safety checks
       const MAX_DIM = 16000;
       const MAX_PIXELS = 100000000;
       if (outW > MAX_DIM || outH > MAX_DIM) {
@@ -975,16 +1074,13 @@
       nctx.imageSmoothingEnabled = true;
       nctx.imageSmoothingQuality = 'high';
 
-      // JPEG needs white background
       if (state.format === 'jpeg') {
         nctx.fillStyle = '#ffffff';
         nctx.fillRect(0, 0, nativeW, nativeH);
       }
 
-      // Draw background
       nctx.drawImage(bgImage, 0, 0, nativeW, nativeH);
 
-      // Draw logo (convert screen → native pixels)
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
       const scaleX = nativeW / stageW;
@@ -1003,7 +1099,7 @@
         logoHscreen * scaleY
       );
 
-      // ===== Step 2: Sharpen at native resolution (for ×2/×3) =====
+      // ===== Step 2: Sharpen =====
       let finalCanvas = nativeCanvas;
       let sharpenApplied = false;
 
@@ -1014,7 +1110,6 @@
         const sharpenAmount = mult === 2 ? 0.55 : 0.85;
         sharpenApplied = trySharpen(nativeCanvas, sharpenAmount);
 
-        // ===== Step 3: Upscale to target resolution =====
         loadingText.textContent = 'جاري تكبير الصورة...';
         await new Promise(r => setTimeout(r, 30));
 
@@ -1027,7 +1122,7 @@
         octx.drawImage(nativeCanvas, 0, 0, outW, outH);
       }
 
-      // ===== Step 4: Export =====
+      // ===== Step 3: Export =====
       loadingText.textContent = 'جاري إنشاء الملف...';
       await new Promise(r => setTimeout(r, 30));
 
@@ -1049,7 +1144,7 @@
         throw secErr;
       }
 
-      // ===== Step 5: Download with user's filename =====
+      // ===== Step 4: Download with user's filename =====
       const baseName = sanitizeFilename(filenameInput.value);
       const fileName = baseName + '.' + ext;
 
@@ -1060,7 +1155,6 @@
       a.click();
       document.body.removeChild(a);
 
-      // Success message
       const parts = ['✓ تم التنزيل', outW + '×' + outH, mimeType];
       if (mult > 1 && sharpenApplied) parts.push('حِدّة');
       showToast(parts.join(' · '), 3200);
@@ -1080,6 +1174,8 @@
     }
   });
 
+  // ===== Init =====
+  updateFilenameUI();
   tryAutoLoadLogo();
 })();
 </script>
