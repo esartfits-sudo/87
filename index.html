@@ -305,7 +305,6 @@
     font-weight: 500;
   }
 
-  /* ===== Filename input (enhanced) ===== */
   .filename-control {
     display: flex;
     flex-direction: column;
@@ -574,7 +573,6 @@
       <span class="size-value" id="jpegQualityValue">95%</span>
     </div>
 
-    <!-- ===== اسم الملف (محسّن) ===== -->
     <div class="filename-control">
       <div class="filename-row">
         <label for="filenameInput">اسم الملف</label>
@@ -679,15 +677,10 @@
 
   function sanitizeFilename(name) {
     let clean = (name || '').trim();
-    // Remove extension if user typed one
     clean = clean.replace(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/i, '');
-    // Replace invalid filename characters
     clean = clean.replace(/[\/\\:*?"<>|]/g, '-');
-    // Collapse repeated dashes/spaces
     clean = clean.replace(/[\s\-]+/g, '-');
-    // Remove leading/trailing dashes and dots
     clean = clean.replace(/^[\-.]+|[\-.]+$/g, '');
-    // Limit length
     clean = clean.substring(0, 80);
     return clean || DEFAULT_FILENAME;
   }
@@ -695,9 +688,7 @@
   function updateFilenameUI() {
     const ext = getExtension();
     extBadge.textContent = '.' + ext;
-
-    const rawName = filenameInput.value;
-    const cleanName = sanitizeFilename(rawName);
+    const cleanName = sanitizeFilename(filenameInput.value);
     const finalName = cleanName + '.' + ext;
     filenamePreview.innerHTML = 'سيتم التنزيل باسم: <b>' + finalName + '</b>';
   }
@@ -1053,6 +1044,7 @@
       const outW = nativeW * mult;
       const outH = nativeH * mult;
 
+      // Safety limits
       const MAX_DIM = 16000;
       const MAX_PIXELS = 100000000;
       if (outW > MAX_DIM || outH > MAX_DIM) {
@@ -1066,63 +1058,87 @@
         return;
       }
 
-      // ===== Step 1: Draw at native resolution =====
-      const nativeCanvas = document.createElement('canvas');
-      nativeCanvas.width = nativeW;
-      nativeCanvas.height = nativeH;
-      const nctx = nativeCanvas.getContext('2d');
-      nctx.imageSmoothingEnabled = true;
-      nctx.imageSmoothingQuality = 'high';
+      // ============================================
+      // Step 1: Prepare FINAL canvas at OUTPUT resolution
+      // ============================================
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = outW;
+      finalCanvas.height = outH;
+      const fctx = finalCanvas.getContext('2d');
+      fctx.imageSmoothingEnabled = true;
+      fctx.imageSmoothingQuality = 'high';
 
+      // White background for JPEG
       if (state.format === 'jpeg') {
-        nctx.fillStyle = '#ffffff';
-        nctx.fillRect(0, 0, nativeW, nativeH);
+        fctx.fillStyle = '#ffffff';
+        fctx.fillRect(0, 0, outW, outH);
       }
 
-      nctx.drawImage(bgImage, 0, 0, nativeW, nativeH);
+      // ============================================
+      // Step 2: Background — native + sharpen + upscale
+      // ============================================
+      let sharpenApplied = false;
+      let bgSource = bgImage;
+
+      if (mult > 1) {
+        loadingText.textContent = 'جاري تحسين الحدّة...';
+        await new Promise(r => setTimeout(r, 30));
+
+        const nativeCanvas = document.createElement('canvas');
+        nativeCanvas.width = nativeW;
+        nativeCanvas.height = nativeH;
+        const nctx = nativeCanvas.getContext('2d');
+        nctx.imageSmoothingEnabled = true;
+        nctx.imageSmoothingQuality = 'high';
+
+        if (state.format === 'jpeg') {
+          nctx.fillStyle = '#ffffff';
+          nctx.fillRect(0, 0, nativeW, nativeH);
+        }
+
+        nctx.drawImage(bgImage, 0, 0, nativeW, nativeH);
+
+        const sharpenAmount = mult === 2 ? 0.55 : 0.85;
+        sharpenApplied = trySharpen(nativeCanvas, sharpenAmount);
+        bgSource = nativeCanvas;
+      }
+
+      loadingText.textContent = 'جاري تكبير الخلفية...';
+      await new Promise(r => setTimeout(r, 30));
+
+      // Draw background scaled to output resolution
+      fctx.drawImage(bgSource, 0, 0, outW, outH);
+
+      // ============================================
+      // Step 3: Logo — drawn DIRECTLY at OUTPUT resolution from source
+      // 🔑 This is the fix: no more double-blur for the logo
+      // ============================================
+      loadingText.textContent = 'جاري رسم اللوجو بأعلى جودة...';
+      await new Promise(r => setTimeout(r, 30));
 
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
-      const scaleX = nativeW / stageW;
-      const scaleY = nativeH / stageH;
+      const scaleX = outW / stageW;
+      const scaleY = outH / stageH;
 
       const logoXscreen = parseFloat(logo.style.left) || 0;
       const logoYscreen = parseFloat(logo.style.top) || 0;
       const logoWscreen = parseFloat(logo.style.width) || 0;
       const logoHscreen = parseFloat(logo.style.height) || 0;
 
-      nctx.drawImage(
-        logo,
-        logoXscreen * scaleX,
-        logoYscreen * scaleY,
-        logoWscreen * scaleX,
-        logoHscreen * scaleY
-      );
+      // Round to whole pixels to avoid sub-pixel blur on logo edges
+      const logoX = Math.round(logoXscreen * scaleX);
+      const logoY = Math.round(logoYscreen * scaleY);
+      const logoW = Math.round(logoWscreen * scaleX);
+      const logoH = Math.round(logoHscreen * scaleY);
 
-      // ===== Step 2: Sharpen =====
-      let finalCanvas = nativeCanvas;
-      let sharpenApplied = false;
+      fctx.imageSmoothingEnabled = true;
+      fctx.imageSmoothingQuality = 'high';
+      fctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
-      if (mult > 1) {
-        loadingText.textContent = 'جاري تحسين الحدّة...';
-        await new Promise(r => setTimeout(r, 30));
-
-        const sharpenAmount = mult === 2 ? 0.55 : 0.85;
-        sharpenApplied = trySharpen(nativeCanvas, sharpenAmount);
-
-        loadingText.textContent = 'جاري تكبير الصورة...';
-        await new Promise(r => setTimeout(r, 30));
-
-        finalCanvas = document.createElement('canvas');
-        finalCanvas.width = outW;
-        finalCanvas.height = outH;
-        const octx = finalCanvas.getContext('2d');
-        octx.imageSmoothingEnabled = true;
-        octx.imageSmoothingQuality = 'high';
-        octx.drawImage(nativeCanvas, 0, 0, outW, outH);
-      }
-
-      // ===== Step 3: Export =====
+      // ============================================
+      // Step 4: Export to data URL
+      // ============================================
       loadingText.textContent = 'جاري إنشاء الملف...';
       await new Promise(r => setTimeout(r, 30));
 
@@ -1144,7 +1160,9 @@
         throw secErr;
       }
 
-      // ===== Step 4: Download with user's filename =====
+      // ============================================
+      // Step 5: Download with user's filename
+      // ============================================
       const baseName = sanitizeFilename(filenameInput.value);
       const fileName = baseName + '.' + ext;
 
@@ -1156,6 +1174,7 @@
       document.body.removeChild(a);
 
       const parts = ['✓ تم التنزيل', outW + '×' + outH, mimeType];
+      if (mult > 1) parts.push('لوجو HD');
       if (mult > 1 && sharpenApplied) parts.push('حِدّة');
       showToast(parts.join(' · '), 3200);
 
