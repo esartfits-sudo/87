@@ -136,14 +136,8 @@
     flex-direction: column;
     gap: 10px;
     flex-shrink: 0;
-    max-height: 55vh;
+    max-height: 58vh;
     overflow-y: auto;
-  }
-
-  .row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
   }
 
   .btn {
@@ -293,6 +287,10 @@
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
   }
 
   .segmented button.active {
@@ -301,13 +299,62 @@
     box-shadow: 0 2px 6px rgba(10, 77, 140, 0.35);
   }
 
+  .segmented button small {
+    font-size: 9px;
+    opacity: 0.85;
+    font-weight: 500;
+  }
+
+  /* Filename input */
+  .filename-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 8px 10px 8px 14px;
+  }
+
+  .filename-control label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+
+  .filename-control input {
+    flex: 1;
+    border: 2px solid transparent;
+    background: var(--white);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--blue-dark);
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.15s;
+    direction: ltr;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .filename-control input:focus {
+    border-color: var(--blue);
+  }
+
+  .filename-control input::placeholder {
+    color: #a0b0c0;
+    font-weight: 500;
+  }
+
   .info-bar {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 14px;
     font-size: 11px;
     color: var(--blue);
-    opacity: 0.8;
+    opacity: 0.85;
     padding: 2px 4px;
     flex-wrap: wrap;
   }
@@ -437,11 +484,11 @@
     </div>
 
     <div class="quality-control">
-      <label>جودة الطباعة</label>
+      <label>الجودة والتفاصيل</label>
       <div class="segmented" id="qualitySegmented">
         <button data-mult="1" class="active">عادي</button>
-        <button data-mult="2">×2</button>
-        <button data-mult="3">×3</button>
+        <button data-mult="2">×2 <small>حِدّة</small></button>
+        <button data-mult="3">×3 <small>حِدّة</small></button>
       </div>
     </div>
 
@@ -457,6 +504,11 @@
       <label>جودة JPEG</label>
       <input type="range" id="jpegQuality" dir="ltr" min="70" max="100" value="95">
       <span class="size-value" id="jpegQualityValue">95%</span>
+    </div>
+
+    <div class="filename-control">
+      <label for="filenameInput">اسم الملف</label>
+      <input type="text" id="filenameInput" value="image-with-logo" maxlength="100" spellcheck="false" autocomplete="off" placeholder="image-with-logo">
     </div>
 
     <button class="btn btn-primary" id="downloadBtn" disabled>
@@ -481,7 +533,7 @@
 <div id="toast"></div>
 <div id="loading">
   <div class="spinner"></div>
-  <span>جاري تجهيز الصورة...</span>
+  <span id="loadingText">جاري تجهيز الصورة...</span>
 </div>
 
 <script>
@@ -509,8 +561,10 @@
   const jpegQualityRow = document.getElementById('jpegQualityRow');
   const jpegQuality = document.getElementById('jpegQuality');
   const jpegQualityValue = document.getElementById('jpegQualityValue');
+  const filenameInput = document.getElementById('filenameInput');
   const toast = document.getElementById('toast');
   const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loadingText');
   const canvasArea = document.getElementById('canvasArea');
 
   const state = {
@@ -699,7 +753,6 @@
     });
   });
 
-  // ===== Format segmented =====
   formatSegmented.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
       formatSegmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -710,7 +763,6 @@
     });
   });
 
-  // ===== JPEG quality slider =====
   function updateJpegFill() {
     const min = parseFloat(jpegQuality.min);
     const max = parseFloat(jpegQuality.max);
@@ -734,10 +786,13 @@
     const w = state.bgNatural.w * state.qualityMult;
     const h = state.bgNatural.h * state.qualityMult;
     infoDim.textContent = w + ' × ' + h;
+
     if (state.qualityMult === 1) {
       infoQuality.textContent = '🎯 دقة أصلية';
+    } else if (state.qualityMult === 2) {
+      infoQuality.textContent = '🎯 ×2 + حِدّة';
     } else {
-      infoQuality.textContent = '🎯 طباعة ×' + state.qualityMult;
+      infoQuality.textContent = '🎯 ×3 + حِدّة';
     }
     infoFormat.textContent = '📄 ' + state.format.toUpperCase();
     infoBar.style.display = 'flex';
@@ -815,72 +870,177 @@
     resizeTimer = setTimeout(fitStageToViewport, 150);
   });
 
+  // ===== Filename sanitization =====
+  function sanitizeFilename(name) {
+    let clean = (name || '').trim();
+    // Remove extension if user typed one
+    clean = clean.replace(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/i, '');
+    // Replace invalid filename characters with dashes
+    clean = clean.replace(/[\/\\:*?"<>|.]/g, '-');
+    // Collapse repeated dashes/spaces
+    clean = clean.replace(/[\s\-]+/g, '-');
+    // Remove leading/trailing dashes
+    clean = clean.replace(/^-+|-+$/g, '');
+    // Limit length
+    clean = clean.substring(0, 80);
+    return clean || 'image-with-logo';
+  }
+
+  // ===== Sharpen (unsharp mask) =====
+  // Returns true if sharpening applied, false if skipped (too large / tainted / error)
+  function trySharpen(canvas, amount) {
+    try {
+      const w = canvas.width;
+      const h = canvas.height;
+      const pixels = w * h;
+
+      // Safety: skip if image is too large for mobile memory
+      if (pixels > 15000000) {
+        console.warn('Image too large for sharpening (' + pixels + ' px), skipping');
+        return false;
+      }
+
+      const ctx = canvas.getContext('2d');
+
+      // Create blurred version
+      const blurCanvas = document.createElement('canvas');
+      blurCanvas.width = w;
+      blurCanvas.height = h;
+      const bctx = blurCanvas.getContext('2d');
+      bctx.filter = 'blur(1.2px)';
+      bctx.drawImage(canvas, 0, 0);
+
+      const orig = ctx.getImageData(0, 0, w, h);
+      const bd = bctx.getImageData(0, 0, w, h).data;
+      const od = orig.data;
+
+      // Unsharp mask: result = orig + (orig - blur) * amount
+      for (let i = 0; i < od.length; i += 4) {
+        const dr = od[i] - bd[i];
+        const dg = od[i + 1] - bd[i + 1];
+        const db = od[i + 2] - bd[i + 2];
+
+        const r = od[i] + dr * amount;
+        const g = od[i + 1] + dg * amount;
+        const b = od[i + 2] + db * amount;
+
+        od[i]     = r < 0 ? 0 : r > 255 ? 255 : r;
+        od[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+        od[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+      }
+
+      ctx.putImageData(orig, 0, 0);
+      return true;
+    } catch (e) {
+      console.warn('Sharpen skipped:', e.message);
+      return false;
+    }
+  }
+
   // ===== Export =====
   downloadBtn.addEventListener('click', async () => {
     if (!state.bgReady || !state.logoReady) return;
 
     loading.classList.add('show');
+    loadingText.textContent = 'جاري تجهيز الصورة...';
 
     try {
       await new Promise(r => setTimeout(r, 60));
 
       const mult = state.qualityMult;
-      const W = state.bgNatural.w * mult;
-      const H = state.bgNatural.h * mult;
+      const nativeW = state.bgNatural.w;
+      const nativeH = state.bgNatural.h;
+      const outW = nativeW * mult;
+      const outH = nativeH * mult;
 
+      // Safety checks
       const MAX_DIM = 16000;
       const MAX_PIXELS = 100000000;
-      if (W > MAX_DIM || H > MAX_DIM) {
+      if (outW > MAX_DIM || outH > MAX_DIM) {
         showToast('⚠️ الصورة كبيرة جداً — اختر جودة أقل', 4000);
         loading.classList.remove('show');
         return;
       }
-      if (W * H > MAX_PIXELS) {
+      if (outW * outH > MAX_PIXELS) {
         showToast('⚠️ الصورة كبيرة جداً — اختر ×2 أو عادي', 4000);
         loading.classList.remove('show');
         return;
       }
 
-      const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+      // ===== Step 1: Draw at native resolution =====
+      const nativeCanvas = document.createElement('canvas');
+      nativeCanvas.width = nativeW;
+      nativeCanvas.height = nativeH;
+      const nctx = nativeCanvas.getContext('2d');
+      nctx.imageSmoothingEnabled = true;
+      nctx.imageSmoothingQuality = 'high';
 
-      // JPEG doesn't support transparency — fill white first
+      // JPEG needs white background
       if (state.format === 'jpeg') {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, W, H);
+        nctx.fillStyle = '#ffffff';
+        nctx.fillRect(0, 0, nativeW, nativeH);
       }
 
-      ctx.drawImage(bgImage, 0, 0, W, H);
+      // Draw background
+      nctx.drawImage(bgImage, 0, 0, nativeW, nativeH);
 
+      // Draw logo (convert screen → native pixels)
       const stageW = stage.clientWidth;
       const stageH = stage.clientHeight;
+      const scaleX = nativeW / stageW;
+      const scaleY = nativeH / stageH;
+
       const logoXscreen = parseFloat(logo.style.left) || 0;
       const logoYscreen = parseFloat(logo.style.top) || 0;
       const logoWscreen = parseFloat(logo.style.width) || 0;
       const logoHscreen = parseFloat(logo.style.height) || 0;
 
-      const scaleX = W / stageW;
-      const scaleY = H / stageH;
+      nctx.drawImage(
+        logo,
+        logoXscreen * scaleX,
+        logoYscreen * scaleY,
+        logoWscreen * scaleX,
+        logoHscreen * scaleY
+      );
 
-      const logoX = logoXscreen * scaleX;
-      const logoY = logoYscreen * scaleY;
-      const logoW = logoWscreen * scaleX;
-      const logoH = logoHscreen * scaleY;
+      // ===== Step 2: Sharpen at native resolution (for ×2/×3) =====
+      let finalCanvas = nativeCanvas;
+      let sharpenApplied = false;
 
-      ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+      if (mult > 1) {
+        loadingText.textContent = 'جاري تحسين الحدّة...';
+        await new Promise(r => setTimeout(r, 30));
 
-      let dataURL, ext;
+        const sharpenAmount = mult === 2 ? 0.55 : 0.85;
+        sharpenApplied = trySharpen(nativeCanvas, sharpenAmount);
+
+        // ===== Step 3: Upscale to target resolution =====
+        loadingText.textContent = 'جاري تكبير الصورة...';
+        await new Promise(r => setTimeout(r, 30));
+
+        finalCanvas = document.createElement('canvas');
+        finalCanvas.width = outW;
+        finalCanvas.height = outH;
+        const octx = finalCanvas.getContext('2d');
+        octx.imageSmoothingEnabled = true;
+        octx.imageSmoothingQuality = 'high';
+        octx.drawImage(nativeCanvas, 0, 0, outW, outH);
+      }
+
+      // ===== Step 4: Export =====
+      loadingText.textContent = 'جاري إنشاء الملف...';
+      await new Promise(r => setTimeout(r, 30));
+
+      let dataURL, ext, mimeType;
       try {
         if (state.format === 'jpeg') {
-          dataURL = canvas.toDataURL('image/jpeg', state.jpegQuality);
+          dataURL = finalCanvas.toDataURL('image/jpeg', state.jpegQuality);
           ext = 'jpg';
+          mimeType = 'JPEG';
         } else {
-          dataURL = canvas.toDataURL('image/png');
+          dataURL = finalCanvas.toDataURL('image/png');
           ext = 'png';
+          mimeType = 'PNG';
         }
       } catch (secErr) {
         if (secErr.name === 'SecurityError') {
@@ -889,15 +1049,22 @@
         throw secErr;
       }
 
+      // ===== Step 5: Download with user's filename =====
+      const baseName = sanitizeFilename(filenameInput.value);
+      const fileName = baseName + '.' + ext;
+
       const a = document.createElement('a');
-      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      a.download = 'image-with-logo-' + W + 'x' + H + '-' + ts + '.' + ext;
+      a.download = fileName;
       a.href = dataURL;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
-      showToast('تم التنزيل ✓ ' + W + '×' + H + ' (' + ext.toUpperCase() + ')', 3000);
+      // Success message
+      const parts = ['✓ تم التنزيل', outW + '×' + outH, mimeType];
+      if (mult > 1 && sharpenApplied) parts.push('حِدّة');
+      showToast(parts.join(' · '), 3200);
+
     } catch (err) {
       console.error(err);
       if (err.message === 'SECURITY') {
@@ -906,7 +1073,10 @@
         showToast('حدث خطأ أثناء التصدير', 4000);
       }
     } finally {
-      setTimeout(() => loading.classList.remove('show'), 400);
+      setTimeout(() => {
+        loading.classList.remove('show');
+        loadingText.textContent = 'جاري تجهيز الصورة...';
+      }, 400);
     }
   });
 
