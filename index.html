@@ -915,7 +915,6 @@
     filter: drop-shadow(0 4px 14px rgba(10, 77, 140, 0.6));
   }
 
-  /* Handles layer - outside the transform so handles stay constant screen size */
   .preview-handles-layer {
     position: absolute;
     inset: 0;
@@ -930,7 +929,7 @@
     height: 26px;
     margin: -13px 0 0 -13px;
     background: white;
-    border: 3px solid var(--blue);
+    border: 3px solid #4a9eff;
     border-radius: 50%;
     pointer-events: auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.55);
@@ -951,12 +950,133 @@
 
   .logo-handle:active {
     transform: scale(1.25);
-    background: var(--blue-light);
+    background: #4a9eff;
+  }
+
+  /* ===== Preview size slider (inside preview) ===== */
+  .preview-size-panel {
+    position: absolute;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 12px;
+    right: 12px;
+    background: rgba(18, 22, 30, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 15;
+    color: white;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    pointer-events: auto;
+    animation: sizePanelIn 0.28s ease-out;
+  }
+
+  @keyframes sizePanelIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .preview-size-panel .panel-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(74, 158, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+  }
+
+  .preview-size-panel .panel-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #4a9eff;
+  }
+
+  .preview-size-panel .panel-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .preview-size-panel .panel-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .preview-size-panel label {
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.95);
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+
+  .preview-size-value {
+    font-size: 13px;
+    font-weight: 900;
+    color: white;
+    background: rgba(74, 158, 255, 0.28);
+    padding: 3px 10px;
+    border-radius: 8px;
+    min-width: 52px;
+    text-align: center;
+    border: 1px solid rgba(74, 158, 255, 0.4);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    direction: ltr;
+  }
+
+  .preview-size-panel input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #4a9eff var(--fill, 0%), rgba(255,255,255,0.18) var(--fill, 0%));
+    outline: none;
+    direction: ltr;
+    cursor: pointer;
+  }
+
+  .preview-size-panel input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #4a9eff;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    transition: transform 0.1s;
+  }
+
+  .preview-size-panel input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.15);
+  }
+
+  .preview-size-panel input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #4a9eff;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
   }
 
   .preview-hint {
     position: absolute;
-    bottom: calc(16px + env(safe-area-inset-bottom));
+    bottom: calc(105px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0,0,0,0.7);
@@ -1011,7 +1131,6 @@
   </div>
 
   <div class="controls">
-    <!-- Row 1: Two upload buttons -->
     <div class="btn-row">
       <button class="btn btn-outline" id="uploadBgFilesBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1029,7 +1148,6 @@
       </button>
     </div>
 
-    <!-- Row 2: Preview + Size -->
     <div class="btn-row">
       <button class="btn btn-outline" id="previewBtn" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1114,11 +1232,8 @@
   </div>
 </div>
 
-<!-- File picker: NO accept → forces file manager -->
 <input type="file" id="bgFileInput" class="hidden-input">
-<!-- Gallery picker: accept images → opens gallery/photo picker -->
 <input type="file" id="bgGalleryInput" accept="image/*" class="hidden-input">
-<!-- Logo picker -->
 <input type="file" id="logoInput" accept="image/*" class="hidden-input">
 
 <div id="toast"></div>
@@ -1127,7 +1242,6 @@
   <span id="loadingText">جاري تجهيز الصورة...</span>
 </div>
 
-<!-- ===== Size modal ===== -->
 <div id="sizeModal" class="modal-overlay" aria-hidden="true">
   <div class="modal-card">
     <div class="modal-header">
@@ -1180,7 +1294,6 @@
   </div>
 </div>
 
-<!-- ===== Fullscreen preview ===== -->
 <div id="previewModal" class="preview-overlay" aria-hidden="true">
   <div class="preview-toolbar">
     <div class="preview-info" id="previewInfo">0 × 0 px</div>
@@ -1193,6 +1306,23 @@
     </div>
   </div>
   <div class="preview-canvas-wrap" id="previewCanvasWrap"></div>
+
+  <!-- Preview size panel -->
+  <div class="preview-size-panel" id="previewSizePanel">
+    <div class="panel-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v10M7 12h10"/>
+      </svg>
+    </div>
+    <div class="panel-content">
+      <div class="panel-label-row">
+        <label for="previewSizeSlider">حجم اللوجو</label>
+        <span class="preview-size-value" id="previewSizeValue">30%</span>
+      </div>
+      <input type="range" id="previewSizeSlider" dir="ltr" min="5" max="200" value="30">
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1257,6 +1387,11 @@
   const previewReset = document.getElementById('previewReset');
   const previewClose = document.getElementById('previewClose');
 
+  // NEW: preview size slider
+  const previewSizeSlider = document.getElementById('previewSizeSlider');
+  const previewSizeValue = document.getElementById('previewSizeValue');
+  const previewSizePanel = document.getElementById('previewSizePanel');
+
   const DEFAULT_FILENAME = 'image-with-logo';
   const BASE_DPI = 150;
   const DPI_BY_QUALITY = { 1: 150, 2: 300, 3: 450 };
@@ -1299,6 +1434,7 @@
     logoY: 0,
     logoW: 0,
     logoH: 0,
+    sliderDragging: false, // to detect if slider is being dragged
   };
 
   let toastTimer;
@@ -1360,7 +1496,7 @@
     filenameInput.focus();
   });
 
-  // ===== Image validation =====
+  // ===== Image upload =====
   function isValidImageFile(file) {
     if (!file) return false;
     if (file.type && file.type.startsWith('image/')) return true;
@@ -1512,11 +1648,21 @@
     logo.style.top = py + 'px';
   }
 
+  // ===== Size slider (main) =====
   sizeSlider.addEventListener('input', (e) => {
-    state.logoScalePct = parseFloat(e.target.value);
-    sizeValue.textContent = state.logoScalePct + '%';
+    const pct = parseFloat(e.target.value);
+    state.logoScalePct = pct;
+    sizeValue.textContent = pct + '%';
     updateSliderFill();
     applyTransforms();
+
+    // Sync to preview if open
+    if (previewState.isOpen) {
+      resizeLogoInPreview(pct);
+      previewSizeSlider.value = pct;
+      previewSizeValue.textContent = pct + '%';
+      updatePreviewSizeFill();
+    }
   });
 
   function updateSliderFill() {
@@ -1528,6 +1674,66 @@
   }
   updateSliderFill();
 
+  // ===== Preview size slider =====
+  function updatePreviewSizeFill() {
+    const min = parseFloat(previewSizeSlider.min);
+    const max = parseFloat(previewSizeSlider.max);
+    const val = parseFloat(previewSizeSlider.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    previewSizeSlider.style.setProperty('--fill', pct + '%');
+  }
+  updatePreviewSizeFill();
+
+  function resizeLogoInPreview(pct) {
+    if (!previewState.isOpen || previewState.renderW === 0) return;
+
+    // Save center point
+    const cx = previewState.logoX + previewState.logoW / 2;
+    const cy = previewState.logoY + previewState.logoH / 2;
+
+    // Compute new size
+    const newW = previewState.renderW * (pct / 100);
+    const newH = newW * (state.logoNatural.h / state.logoNatural.w);
+    const newX = cx - newW / 2;
+    const newY = cy - newH / 2;
+
+    // Clamp position
+    const maxX = Math.max(0, previewState.renderW - newW);
+    const maxY = Math.max(0, previewState.renderH - newH);
+    previewState.logoX = Math.max(0, Math.min(newX, maxX));
+    previewState.logoY = Math.max(0, Math.min(newY, maxY));
+    previewState.logoW = newW;
+    previewState.logoH = newH;
+
+    if (previewState.logoWrap) {
+      previewState.logoWrap.style.left = previewState.logoX + 'px';
+      previewState.logoWrap.style.top = previewState.logoY + 'px';
+      previewState.logoWrap.style.width = newW + 'px';
+      previewState.logoWrap.style.height = newH + 'px';
+    }
+    updatePreviewHandles();
+    updatePreviewInfo();
+  }
+
+  previewSizeSlider.addEventListener('input', (e) => {
+    const pct = parseFloat(e.target.value);
+    previewSizeValue.textContent = pct + '%';
+    updatePreviewSizeFill();
+
+    state.logoScalePct = pct;
+
+    if (previewState.isOpen) {
+      resizeLogoInPreview(pct);
+    }
+
+    // Sync to main editor
+    sizeSlider.value = pct;
+    sizeValue.textContent = pct + '%';
+    updateSliderFill();
+    applyTransforms();
+  });
+
+  // ===== Quality & Format =====
   qualitySegmented.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
       qualitySegmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -1735,12 +1941,12 @@
   }
 
   function updatePreviewInfo() {
-    const out = { w: previewState.outW, h: previewState.outH };
     const cmInfo = state.customSizeCm
       ? ' · ' + state.customSizeCm.width.toFixed(1) + '×' + state.customSizeCm.height.toFixed(1) + 'cm'
       : '';
     previewInfo.textContent =
-      out.w + ' × ' + out.h + ' px · ' + getCurrentDPI() + ' DPI · Logo ' + state.logoScalePct + '%' + cmInfo;
+      previewState.outW + ' × ' + previewState.outH + ' px · ' +
+      getCurrentDPI() + ' DPI · Logo ' + state.logoScalePct + '%' + cmInfo;
   }
 
   function updatePreviewHandles() {
@@ -1763,10 +1969,8 @@
     for (const name in corners) {
       const el = previewState.handlesLayer.querySelector('[data-handle="' + name + '"]');
       if (!el) continue;
-      const rx = corners[name][0];
-      const ry = corners[name][1];
-      el.style.left = (rx * s + tx) + 'px';
-      el.style.top = (ry * s + ty) + 'px';
+      el.style.left = (corners[name][0] * s + tx) + 'px';
+      el.style.top = (corners[name][1] * s + ty) + 'px';
     }
   }
 
@@ -1850,6 +2054,11 @@
     previewState.logoW = logoWRender;
     previewState.logoH = logoHRender;
 
+    // Sync slider UI
+    previewSizeSlider.value = state.logoScalePct;
+    previewSizeValue.textContent = state.logoScalePct + '%';
+    updatePreviewSizeFill();
+
     updatePreviewInfo();
 
     previewModal.classList.add('show');
@@ -1862,13 +2071,12 @@
 
     const hint = document.createElement('div');
     hint.className = 'preview-hint';
-    hint.textContent = 'اسحب اللوجو لتحريكه · اسحب من المقابض لتكبير/تصغير · اقرص بإصبعين على اللوجو لتغيير حجمه';
+    hint.textContent = 'اسحب اللوجو لتحريكه · اسحب من المقابض لتكبير/تصغير · استخدم الشريط تحت للتحكم في الحجم';
     previewCanvasWrap.appendChild(hint);
     setTimeout(() => { if (hint.parentNode) hint.parentNode.removeChild(hint); }, 5500);
   }
 
   function closePreview() {
-    // Sync state before closing
     syncLogoToState();
     previewModal.classList.remove('show');
     previewModal.setAttribute('aria-hidden', 'true');
@@ -1970,17 +2178,15 @@
     updatePreviewHandles();
   }
 
-  // Set logo size & position in render coords
   function setLogoSize(x, y, w) {
     if (!previewState.isOpen) return;
 
     const aspect = state.logoNatural.w / state.logoNatural.h;
     const minW = 10;
-    const maxW = previewState.renderW * 2; // 200% of image width
+    const maxW = previewState.renderW * 2;
     let newW = Math.max(minW, Math.min(w, maxW));
     let newH = newW / aspect;
 
-    // Keep within image bounds
     const maxX = Math.max(0, previewState.renderW - newW);
     const maxY = Math.max(0, previewState.renderH - newH);
     x = Math.max(0, Math.min(x, maxX));
@@ -2000,8 +2206,20 @@
 
     updatePreviewHandles();
 
-    // Update state (rounded %)
-    state.logoScalePct = Math.round((newW / previewState.renderW) * 100);
+    // Update state based on actual rendered size
+    const pct = Math.round((newW / previewState.renderW) * 100);
+    state.logoScalePct = Math.max(5, Math.min(200, pct));
+
+    // Sync sliders
+    previewSizeSlider.value = state.logoScalePct;
+    previewSizeValue.textContent = state.logoScalePct + '%';
+    updatePreviewSizeFill();
+
+    sizeSlider.value = state.logoScalePct;
+    sizeValue.textContent = state.logoScalePct + '%';
+    updateSliderFill();
+    applyTransforms();
+
     updatePreviewInfo();
   }
 
@@ -2015,6 +2233,10 @@
       sizeValue.textContent = state.logoScalePct + '%';
       updateSliderFill();
       applyTransforms();
+
+      previewSizeSlider.value = state.logoScalePct;
+      previewSizeValue.textContent = state.logoScalePct + '%';
+      updatePreviewSizeFill();
     }
   }
 
@@ -2056,7 +2278,7 @@
   }
 
   // ===== Preview touch =====
-  let pvTouchMode = null; // 'pan' | 'pinch' | 'logo' | 'logo-pinch' | 'logo-handle'
+  let pvTouchMode = null;
   let pvPanStart = null;
   let pvPinchStart = null;
   let pvLogoStart = null;
@@ -2072,7 +2294,6 @@
 
     if (e.touches.length === 2) {
       if (bothTouchesOnLogo(e.touches)) {
-        // Pinch to resize logo
         pvTouchMode = 'logo-pinch';
         const rect = previewCanvasWrap.getBoundingClientRect();
         const x1 = e.touches[0].clientX - rect.left;
@@ -2097,7 +2318,6 @@
         if (previewState.logoImg) previewState.logoImg.classList.add('dragging');
         pvTapMoved = true;
       } else {
-        // Pinch to zoom canvas
         pvTouchMode = 'pinch';
         const rect = previewCanvasWrap.getBoundingClientRect();
         const x1 = e.touches[0].clientX - rect.left;
@@ -2116,14 +2336,11 @@
         pvTapMoved = true;
       }
     } else if (e.touches.length === 1) {
-      // Check handle first
       const handleEl = safeClosest(e.target, '.logo-handle');
       if (handleEl) {
         pvTouchMode = 'logo-handle';
         pvHandleStart = {
           name: handleEl.dataset.handle,
-          startX: e.touches[0].clientX,
-          startY: e.touches[0].clientY,
           logoX: previewState.logoX,
           logoY: previewState.logoY,
           logoW: previewState.logoW,
@@ -2131,7 +2348,6 @@
         };
         pvTapMoved = true;
       } else if (safeClosest(e.target, '.preview-logo')) {
-        // Drag logo
         pvTouchMode = 'logo';
         pvLogoStart = {
           x: e.touches[0].clientX,
@@ -2143,7 +2359,6 @@
         if (previewState.logoImg) previewState.logoImg.classList.add('dragging');
         pvTapMoved = true;
       } else {
-        // Pan canvas
         pvTouchMode = 'pan';
         pvTapMoved = false;
         pvTapPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
