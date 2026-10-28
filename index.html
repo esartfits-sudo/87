@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a4d8c">
 <title>محرر اللوجو على الصورة</title>
+
+<!-- ✅ تحميل اللوجو فوراً بأعلى أولوية قبل أي شيء آخر -->
+<link rel="preload" as="image" href="logo.png" fetchpriority="high">
+
 <style>
   /* ============ Design Tokens ============ */
   :root {
@@ -74,9 +78,7 @@
   }
 
   button, input { font-family: inherit; }
-
   button { cursor: pointer; }
-
   button:focus-visible,
   input:focus-visible {
     outline: 2px solid var(--primary-500);
@@ -226,6 +228,7 @@
   }
 
   .stage-float-btn svg { width: 22px; height: 22px; }
+  .stage-float-btn[hidden] { display: none; }
 
   /* ============ Empty State ============ */
   #emptyState {
@@ -288,7 +291,7 @@
     flex-direction: column;
     gap: 10px;
     flex-shrink: 0;
-    max-height: 62vh;
+    max-height: 68vh;
     overflow-y: auto;
     overscroll-behavior: contain;
     border-top-left-radius: var(--radius-xl);
@@ -300,6 +303,89 @@
   .controls::-webkit-scrollbar-thumb {
     background: var(--border-strong);
     border-radius: 4px;
+  }
+
+  /* ============ Tabs ============ */
+  .tabs {
+    display: flex;
+    gap: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    flex-shrink: 0;
+  }
+
+  .tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--ink-700);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 10px 6px;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 44px;
+    position: relative;
+    white-space: nowrap;
+    transition:
+      background 0.15s var(--ease),
+      color 0.15s var(--ease),
+      box-shadow 0.2s var(--ease),
+      transform 0.12s var(--ease-out);
+  }
+
+  .tab:active:not(.active) {
+    background: var(--primary-50);
+    transform: scale(0.97);
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+    color: #fff;
+    box-shadow:
+      0 2px 8px rgba(10, 77, 140, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .tab.done::after {
+    content: '✓';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 13px;
+    height: 13px;
+    font-size: 8px;
+    background: var(--success);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ============ Tab Panels ============ */
+  .tab-panel {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tab-panel.active {
+    display: flex;
+    animation: panelFade 0.18s var(--ease);
+  }
+
+  @keyframes panelFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   /* ============ Buttons ============ */
@@ -342,13 +428,8 @@
     transition: transform 0.2s var(--ease-out);
   }
 
-  .btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-  }
-
-  .btn:active:not(:disabled) {
-    transform: translateY(0) scale(0.98);
-  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:active:not(:disabled) { transform: translateY(0) scale(0.98); }
 
   .btn-primary {
     background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
@@ -636,9 +717,7 @@
     color: var(--primary-600);
   }
 
-  .filename-reset:active {
-    transform: scale(0.94);
-  }
+  .filename-reset:active { transform: scale(0.94); }
 
   .filename-preview {
     font-size: 11px;
@@ -666,6 +745,7 @@
     gap: 6px;
     padding: 2px 4px;
     flex-wrap: wrap;
+    flex-shrink: 0;
   }
 
   .info-bar span {
@@ -1007,9 +1087,7 @@
     min-height: 48px;
   }
 
-  .modal-btn:active:not(:disabled) {
-    transform: scale(0.97);
-  }
+  .modal-btn:active:not(:disabled) { transform: scale(0.97); }
 
   .modal-btn-primary {
     background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
@@ -1126,28 +1204,19 @@
     flex-shrink: 0;
   }
 
-  .preview-actions button:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
+  .preview-actions button:hover { background: rgba(255, 255, 255, 0.2); }
   .preview-actions button:active {
     background: rgba(255, 255, 255, 0.28);
     transform: scale(0.92);
   }
-
-  .preview-actions button:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
+  .preview-actions button:disabled { opacity: 0.35; cursor: not-allowed; }
 
   #previewClose {
     background: rgba(239, 68, 68, 0.2);
     border-color: rgba(239, 68, 68, 0.4);
   }
 
-  #previewClose:hover {
-    background: rgba(239, 68, 68, 0.4);
-  }
+  #previewClose:hover { background: rgba(239, 68, 68, 0.4); }
 
   #previewZoomLevel {
     font-size: 11.5px;
@@ -1276,7 +1345,7 @@
       0 0 0 8px rgba(74, 158, 255, 0.25);
   }
 
-  /* ============ Preview Size Panel (docked below canvas) ============ */
+  /* ============ Preview Size Panel ============ */
   .preview-size-panel {
     background: #12161e;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -1423,16 +1492,21 @@
     100% { opacity: 0; }
   }
 
-  /* ============ Responsive tweaks ============ */
+  /* ============ Responsive ============ */
   @media (max-width: 360px) {
     .btn { font-size: 12px; padding: 12px 8px; }
     .btn svg { width: 18px; height: 18px; }
     header h1 { font-size: 14px; }
     .controls { padding: 12px 10px calc(12px + var(--safe-bottom)); }
+    .tab { font-size: 11px; padding: 9px 4px; gap: 3px; }
   }
 
   @media (min-height: 780px) {
-    .controls { max-height: 58vh; }
+    .controls { max-height: 62vh; }
+  }
+
+  @media (max-width: 340px) {
+    .tab .tab-icon { display: none; }
   }
 </style>
 </head>
@@ -1445,8 +1519,8 @@
 
   <div class="canvas-area" id="canvasArea">
     <div id="stage">
-      <img id="bgImage" alt="الصورة" style="display:none;">
-      <img id="logo" alt="اللوجو" style="display:none;">
+      <img id="bgImage" alt="الصورة" style="display:none;" decoding="async">
+      <img id="logo" alt="اللوجو" style="display:none;" decoding="async">
       <button class="stage-float-btn" id="stagePreviewBtn" hidden title="معاينة كاملة" aria-label="معاينة كاملة">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"/>
@@ -1463,38 +1537,44 @@
           </svg>
         </div>
         <p>ارفع صورة عشان تبدأ</p>
-        <small id="logoHint">جاري تحميل logo.png تلقائياً...</small>
+        <small>اختار صورة من الملفات أو المعرض</small>
       </div>
     </div>
   </div>
 
   <div class="controls">
-    <div class="btn-row">
-      <button class="btn btn-outline" id="uploadBgFilesBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-        من الملفات
-      </button>
-      <button class="btn btn-outline" id="uploadBgGalleryBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <circle cx="8.5" cy="8.5" r="1.5"/>
-          <path d="M21 15l-5-5L5 21"/>
-        </svg>
-        من المعرض
-      </button>
-    </div>
 
-    <div class="btn-row">
-      <button class="btn btn-outline" id="previewBtn" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="7"/>
-          <path d="M21 21l-4.35-4.35"/>
-          <path d="M11 8v6M8 11h6"/>
-        </svg>
-        معاينة
+    <!-- ============ TABS ============ -->
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="image" role="tab" aria-selected="true">
+        <span class="tab-icon">🖼️</span><span>الصورة</span>
       </button>
+      <button class="tab" data-tab="logo" role="tab" aria-selected="false">
+        <span class="tab-icon">✨</span><span>اللوجو</span>
+      </button>
+      <button class="tab" data-tab="export" role="tab" aria-selected="false">
+        <span class="tab-icon">⚙️</span><span>التصدير</span>
+      </button>
+    </nav>
+
+    <!-- ============ TAB 1: IMAGE ============ -->
+    <div class="tab-panel active" data-panel="image">
+      <div class="btn-row">
+        <button class="btn btn-outline" id="uploadBgFilesBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          من الملفات
+        </button>
+        <button class="btn btn-outline" id="uploadBgGalleryBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+          من المعرض
+        </button>
+      </div>
       <button class="btn btn-outline" id="openSizeBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -1504,55 +1584,78 @@
       </button>
     </div>
 
-    <button class="btn btn-outline" id="chooseLogoBtn" hidden>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M12 7v10M7 12h10"/>
-      </svg>
-      اختيار اللوجو يدوياً
-    </button>
+    <!-- ============ TAB 2: LOGO ============ -->
+    <div class="tab-panel" data-panel="logo">
+      <button class="btn btn-outline" id="chooseLogoBtn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 7v10M7 12h10"/>
+        </svg>
+        اختيار اللوجو يدوياً
+      </button>
 
-    <div class="size-control">
-      <label>حجم اللوجو</label>
-      <input type="range" id="sizeSlider" dir="ltr" min="5" max="200" value="30" disabled>
-      <span class="size-value" id="sizeValue">30%</span>
-    </div>
-
-    <div class="quality-control">
-      <label>الجودة</label>
-      <div class="segmented" id="qualitySegmented">
-        <button data-mult="1" class="active">عادي</button>
-        <button data-mult="2">×2 <small>HD</small></button>
-        <button data-mult="3">×3 <small>Ultra</small></button>
+      <div class="size-control">
+        <label>حجم اللوجو</label>
+        <input type="range" id="sizeSlider" dir="ltr" min="5" max="200" value="30" disabled>
+        <span class="size-value" id="sizeValue">30%</span>
       </div>
+
+      <button class="btn btn-outline" id="previewBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+        معاينة كاملة
+      </button>
     </div>
 
-    <div class="quality-control">
-      <label>الصيغة</label>
-      <div class="segmented" id="formatSegmented">
-        <button data-format="png" class="active">PNG</button>
-        <button data-format="jpeg">JPEG</button>
-      </div>
-    </div>
-
-    <div class="size-control" id="jpegQualityRow" style="display:none;">
-      <label>جودة JPEG</label>
-      <input type="range" id="jpegQuality" dir="ltr" min="70" max="100" value="95">
-      <span class="size-value" id="jpegQualityValue">95%</span>
-    </div>
-
-    <div class="filename-control">
-      <div class="filename-row">
-        <label for="filenameInput">اسم الملف</label>
-        <div class="filename-input-wrap">
-          <input type="text" id="filenameInput" value="" maxlength="80" spellcheck="false" autocomplete="off" placeholder="اتركه فاضي للاسم الافتراضي">
-          <span class="ext-badge" id="extBadge">.png</span>
+    <!-- ============ TAB 3: EXPORT ============ -->
+    <div class="tab-panel" data-panel="export">
+      <div class="quality-control">
+        <label>الجودة</label>
+        <div class="segmented" id="qualitySegmented">
+          <button data-mult="1" class="active">عادي</button>
+          <button data-mult="2">×2 <small>HD</small></button>
+          <button data-mult="3">×3 <small>Ultra</small></button>
         </div>
-        <button type="button" class="filename-reset" id="filenameReset" title="مسح الاسم" aria-label="مسح الاسم">↺</button>
       </div>
-      <div class="filename-preview" id="filenamePreview">سيتم التنزيل باسم: <b>image-with-logo.png</b></div>
+
+      <div class="quality-control">
+        <label>الصيغة</label>
+        <div class="segmented" id="formatSegmented">
+          <button data-format="png" class="active">PNG</button>
+          <button data-format="jpeg">JPEG</button>
+        </div>
+      </div>
+
+      <div class="size-control" id="jpegQualityRow" style="display:none;">
+        <label>جودة JPEG</label>
+        <input type="range" id="jpegQuality" dir="ltr" min="70" max="100" value="95">
+        <span class="size-value" id="jpegQualityValue">95%</span>
+      </div>
+
+      <div class="filename-control">
+        <div class="filename-row">
+          <label for="filenameInput">اسم الملف</label>
+          <div class="filename-input-wrap">
+            <input type="text" id="filenameInput" value="" maxlength="80" spellcheck="false" autocomplete="off" placeholder="اتركه فاضي للاسم الافتراضي">
+            <span class="ext-badge" id="extBadge">.png</span>
+          </div>
+          <button type="button" class="filename-reset" id="filenameReset" title="مسح الاسم" aria-label="مسح الاسم">↺</button>
+        </div>
+        <div class="filename-preview" id="filenamePreview">سيتم التنزيل باسم: <b>image-with-logo.png</b></div>
+      </div>
     </div>
 
+    <!-- ============ INFO BAR (always visible) ============ -->
+    <div class="info-bar" id="infoBar" style="display:none;">
+      <span>📐 <b id="infoDim">-</b></span>
+      <span id="infoQuality">🎯 دقة أصلية</span>
+      <span id="infoFormat">📄 PNG</span>
+    </div>
+
+    <!-- ============ DOWNLOAD (always visible) ============ -->
     <button class="btn btn-primary" id="downloadBtn" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -1561,12 +1664,6 @@
       </svg>
       تنزيل الصورة
     </button>
-
-    <div class="info-bar" id="infoBar" style="display:none;">
-      <span>📐 <b id="infoDim">-</b></span>
-      <span id="infoQuality">🎯 دقة أصلية</span>
-      <span id="infoFormat">📄 PNG</span>
-    </div>
   </div>
 </div>
 
@@ -1670,7 +1767,6 @@
   const bgImage = document.getElementById('bgImage');
   const logo = document.getElementById('logo');
   const emptyState = document.getElementById('emptyState');
-  const logoHint = document.getElementById('logoHint');
   const bgFileInput = document.getElementById('bgFileInput');
   const bgGalleryInput = document.getElementById('bgGalleryInput');
   const logoInput = document.getElementById('logoInput');
@@ -1726,7 +1822,6 @@
 
   const previewSizeSlider = document.getElementById('previewSizeSlider');
   const previewSizeValue = document.getElementById('previewSizeValue');
-  const previewSizePanel = document.getElementById('previewSizePanel');
 
   const DEFAULT_FILENAME = 'image-with-logo';
   const BASE_DPI = 150;
@@ -1780,6 +1875,29 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
   }
+
+  /* ============ Tabs ============ */
+  function switchToTab(name) {
+    document.querySelectorAll('.tab').forEach(t => {
+      const on = t.dataset.tab === name;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.dataset.panel === name);
+    });
+  }
+
+  function markTabDone(name) {
+    const tab = document.querySelector('.tab[data-tab="' + name + '"]');
+    if (tab) tab.classList.add('done');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchToTab(tab.dataset.tab));
+  });
+
+  let hasAutoAdvanced = false;
 
   function maybeEnableDownload() {
     const ready = state.bgReady && state.logoReady;
@@ -1856,8 +1974,15 @@
       updateInfo();
       applyTransforms();
       maybeEnableDownload();
+      markTabDone('image');
       URL.revokeObjectURL(url);
       showToast('تم تحميل الصورة ✓');
+
+      // Auto-advance first time only
+      if (!hasAutoAdvanced) {
+        hasAutoAdvanced = true;
+        switchToTab('logo');
+      }
     };
     img.onerror = () => {
       showToast('خطأ في تحميل الصورة');
@@ -1881,6 +2006,32 @@
     e.target.value = '';
   });
 
+  /* ============ Fast Logo Load ============ */
+  // Preload already started via <link rel="preload">. This just uses the cache.
+  function initLogoLoad() {
+    logo.decoding = 'async';
+    logo.onload = () => {
+      state.logoNatural = { w: logo.naturalWidth, h: logo.naturalHeight };
+      logo.style.display = 'block';
+      state.logoReady = true;
+      sizeSlider.disabled = false;
+      chooseLogoBtn.hidden = true;
+      applyTransforms();
+      maybeEnableDownload();
+      markTabDone('logo');
+    };
+    logo.onerror = () => {
+      chooseLogoBtn.hidden = false;
+      // If image is loaded but logo missing, guide user to logo tab
+      if (state.bgReady) {
+        switchToTab('logo');
+      }
+      showToast('⚠️ مش لاقي logo.png — اختار اللوجو يدوياً', 3500);
+    };
+    // Hit the preload cache — instant if preload finished, tiny network hit otherwise
+    logo.src = 'logo.png';
+  }
+
   function applyLogoImage(src) {
     return new Promise((resolve, reject) => {
       const probe = new Image();
@@ -1891,37 +2042,14 @@
         state.logoReady = true;
         sizeSlider.disabled = false;
         chooseLogoBtn.hidden = true;
-        if (logoHint) logoHint.textContent = 'اللوجو جاهز ✓';
         applyTransforms();
         maybeEnableDownload();
+        markTabDone('logo');
         resolve();
       };
       probe.onerror = () => reject(new Error('LOGO_LOAD_FAIL'));
       probe.src = src;
     });
-  }
-
-  async function tryAutoLoadLogo() {
-    try {
-      const resp = await fetch('logo.png', { cache: 'no-cache' });
-      if (resp.ok) {
-        const blob = await resp.blob();
-        const url = URL.createObjectURL(blob);
-        await applyLogoImage(url);
-        showToast('تم تحميل logo.png تلقائياً ✓');
-        return;
-      }
-    } catch (e) {}
-
-    try {
-      await applyLogoImage('logo.png');
-      showToast('تم تحميل logo.png تلقائياً ✓');
-      return;
-    } catch (e) {
-      chooseLogoBtn.hidden = false;
-      if (logoHint) logoHint.textContent = 'مش لاقي logo.png — اختار اللوجو يدوياً';
-      showToast('⚠️ مش لاقي logo.png — اختار اللوجو يدوياً', 4000);
-    }
   }
 
   chooseLogoBtn.addEventListener('click', () => logoInput.click());
@@ -2016,22 +2144,18 @@
 
   function resizeLogoInPreview(pct) {
     if (!previewState.isOpen || previewState.renderW === 0) return;
-
     const cx = previewState.logoX + previewState.logoW / 2;
     const cy = previewState.logoY + previewState.logoH / 2;
-
     const newW = previewState.renderW * (pct / 100);
     const newH = newW * (state.logoNatural.h / state.logoNatural.w);
     const newX = cx - newW / 2;
     const newY = cy - newH / 2;
-
     const maxX = Math.max(0, previewState.renderW - newW);
     const maxY = Math.max(0, previewState.renderH - newH);
     previewState.logoX = Math.max(0, Math.min(newX, maxX));
     previewState.logoY = Math.max(0, Math.min(newY, maxY));
     previewState.logoW = newW;
     previewState.logoH = newH;
-
     if (previewState.logoWrap) {
       previewState.logoWrap.style.left = previewState.logoX + 'px';
       previewState.logoWrap.style.top = previewState.logoY + 'px';
@@ -2046,13 +2170,8 @@
     const pct = parseFloat(e.target.value);
     previewSizeValue.textContent = pct + '%';
     updatePreviewSizeFill();
-
     state.logoScalePct = pct;
-
-    if (previewState.isOpen) {
-      resizeLogoInPreview(pct);
-    }
-
+    if (previewState.isOpen) resizeLogoInPreview(pct);
     sizeSlider.value = pct;
     sizeValue.textContent = pct + '%';
     updateSliderFill();
@@ -2135,7 +2254,6 @@
     const hPx = Math.round(hCm / 2.54 * dpi);
     pixelPreview.textContent = wPx + ' × ' + hPx + ' بكسل';
     dpiPreview.textContent = dpi + ' DPI';
-
     let warning = '';
     let canApply = true;
     if (wCm <= 0 || hCm <= 0) {
@@ -2281,14 +2399,12 @@
     const y = previewState.logoY;
     const w = previewState.logoW;
     const h = previewState.logoH;
-
     const corners = {
       tl: [x, y],
       tr: [x + w, y],
       bl: [x, y + h],
       br: [x + w, y + h],
     };
-
     for (const name in corners) {
       const el = previewState.handlesLayer.querySelector('[data-handle="' + name + '"]');
       if (!el) continue;
@@ -2502,44 +2618,35 @@
 
   function setLogoSize(x, y, w) {
     if (!previewState.isOpen) return;
-
     const aspect = state.logoNatural.w / state.logoNatural.h;
     const minW = 10;
     const maxW = previewState.renderW * 2;
     let newW = Math.max(minW, Math.min(w, maxW));
     let newH = newW / aspect;
-
     const maxX = Math.max(0, previewState.renderW - newW);
     const maxY = Math.max(0, previewState.renderH - newH);
     x = Math.max(0, Math.min(x, maxX));
     y = Math.max(0, Math.min(y, maxY));
-
     previewState.logoX = x;
     previewState.logoY = y;
     previewState.logoW = newW;
     previewState.logoH = newH;
-
     if (previewState.logoWrap) {
       previewState.logoWrap.style.left = x + 'px';
       previewState.logoWrap.style.top = y + 'px';
       previewState.logoWrap.style.width = newW + 'px';
       previewState.logoWrap.style.height = newH + 'px';
     }
-
     updatePreviewHandles();
-
     const pct = Math.round((newW / previewState.renderW) * 100);
     state.logoScalePct = Math.max(5, Math.min(200, pct));
-
     previewSizeSlider.value = state.logoScalePct;
     previewSizeValue.textContent = state.logoScalePct + '%';
     updatePreviewSizeFill();
-
     sizeSlider.value = state.logoScalePct;
     sizeValue.textContent = state.logoScalePct + '%';
     updateSliderFill();
     applyTransforms();
-
     updatePreviewInfo();
   }
 
@@ -2553,7 +2660,6 @@
       sizeValue.textContent = state.logoScalePct + '%';
       updateSliderFill();
       applyTransforms();
-
       previewSizeSlider.value = state.logoScalePct;
       previewSizeValue.textContent = state.logoScalePct + '%';
       updatePreviewSizeFill();
@@ -2609,7 +2715,6 @@
   previewCanvasWrap.addEventListener('touchstart', (e) => {
     if (!previewState.isOpen) return;
     e.preventDefault();
-
     if (e.touches.length === 2) {
       if (bothTouchesOnLogo(e.touches)) {
         pvTouchMode = 'logo-pinch';
@@ -2623,15 +2728,12 @@
         const cy = (y1 + y2) / 2;
         const rx = (cx - previewState.tx) / previewState.scale;
         const ry = (cy - previewState.ty) / previewState.scale;
-        const fracX = (rx - previewState.logoX) / previewState.logoW;
-        const fracY = (ry - previewState.logoY) / previewState.logoH;
         pvLogoPinchStart = {
           dist,
           startW: previewState.logoW,
-          fracX,
-          fracY,
-          rx,
-          ry,
+          fracX: (rx - previewState.logoX) / previewState.logoW,
+          fracY: (ry - previewState.logoY) / previewState.logoH,
+          rx, ry,
         };
         if (previewState.logoImg) previewState.logoImg.classList.add('dragging');
         pvTapMoved = true;
@@ -2693,48 +2795,36 @@
   previewCanvasWrap.addEventListener('touchmove', (e) => {
     if (!previewState.isOpen) return;
     e.preventDefault();
-
     if (pvTouchMode === 'logo' && e.touches.length === 1) {
       const dxScreen = e.touches[0].clientX - pvLogoStart.x;
       const dyScreen = e.touches[0].clientY - pvLogoStart.y;
-      const dxRender = dxScreen / pvLogoStart.scale;
-      const dyRender = dyScreen / pvLogoStart.scale;
-      moveLogoTo(pvLogoStart.logoX + dxRender, pvLogoStart.logoY + dyRender);
+      moveLogoTo(pvLogoStart.logoX + dxScreen / pvLogoStart.scale, pvLogoStart.logoY + dyScreen / pvLogoStart.scale);
     } else if (pvTouchMode === 'logo-handle' && e.touches.length === 1) {
       const rect = previewCanvasWrap.getBoundingClientRect();
       const px = e.touches[0].clientX - rect.left;
       const py = e.touches[0].clientY - rect.top;
       const rx = (px - previewState.tx) / previewState.scale;
       const ry = (py - previewState.ty) / previewState.scale;
-
       const h = pvHandleStart;
       const aspect = state.logoNatural.w / state.logoNatural.h;
       let newX, newY, newW;
-
       if (h.name === 'br') {
-        newX = h.logoX;
-        newY = h.logoY;
-        newW = rx - h.logoX;
+        newX = h.logoX; newY = h.logoY; newW = rx - h.logoX;
       } else if (h.name === 'tl') {
-        const brX = h.logoX + h.logoW;
-        const brY = h.logoY + h.logoH;
+        const brX = h.logoX + h.logoW, brY = h.logoY + h.logoH;
         newW = brX - rx;
         const newH = newW / aspect;
-        newX = brX - newW;
-        newY = brY - newH;
+        newX = brX - newW; newY = brY - newH;
       } else if (h.name === 'tr') {
         const blY = h.logoY + h.logoH;
         newW = rx - h.logoX;
         const newH = newW / aspect;
-        newX = h.logoX;
-        newY = blY - newH;
+        newX = h.logoX; newY = blY - newH;
       } else if (h.name === 'bl') {
         const trX = h.logoX + h.logoW;
         newW = trX - rx;
-        newX = rx;
-        newY = h.logoY;
+        newX = rx; newY = h.logoY;
       }
-
       setLogoSize(newX, newY, newW);
     } else if (pvTouchMode === 'logo-pinch' && e.touches.length === 2) {
       const rect = previewCanvasWrap.getBoundingClientRect();
@@ -2778,7 +2868,6 @@
 
   previewCanvasWrap.addEventListener('touchend', (e) => {
     if (!previewState.isOpen) return;
-
     if (e.touches.length === 0) {
       if (pvTouchMode === 'logo' || pvTouchMode === 'logo-pinch' || pvTouchMode === 'logo-handle') {
         syncLogoToState();
@@ -2789,11 +2878,8 @@
           const rect = previewCanvasWrap.getBoundingClientRect();
           const px = pvTapPosition.x - rect.left;
           const py = pvTapPosition.y - rect.top;
-          if (previewState.scale > previewState.fitScale * 1.5) {
-            resetPreviewView();
-          } else {
-            previewZoomAt(px, py, 2.5);
-          }
+          if (previewState.scale > previewState.fitScale * 1.5) resetPreviewView();
+          else previewZoomAt(px, py, 2.5);
           pvLastTapTime = 0;
         } else {
           pvLastTapTime = now;
@@ -2820,12 +2906,8 @@
 
   previewCanvasWrap.addEventListener('touchcancel', () => {
     if (previewState.logoImg) previewState.logoImg.classList.remove('dragging');
-    pvTouchMode = null;
-    pvPanStart = null;
-    pvPinchStart = null;
-    pvLogoStart = null;
-    pvLogoPinchStart = null;
-    pvHandleStart = null;
+    pvTouchMode = null; pvPanStart = null; pvPinchStart = null;
+    pvLogoStart = null; pvLogoPinchStart = null; pvHandleStart = null;
   });
 
   let pvMouseMode = null;
@@ -2834,7 +2916,6 @@
   previewCanvasWrap.addEventListener('mousedown', (e) => {
     if (!previewState.isOpen) return;
     if (e.button !== 0) return;
-
     const handleEl = safeClosest(e.target, '.logo-handle');
     if (handleEl) {
       pvMouseMode = 'logo-handle';
@@ -2849,10 +2930,8 @@
     } else if (safeClosest(e.target, '.preview-logo')) {
       pvMouseMode = 'logo';
       pvMouseStart = {
-        x: e.clientX,
-        y: e.clientY,
-        logoX: previewState.logoX,
-        logoY: previewState.logoY,
+        x: e.clientX, y: e.clientY,
+        logoX: previewState.logoX, logoY: previewState.logoY,
         scale: previewState.scale,
       };
       if (previewState.logoImg) previewState.logoImg.classList.add('dragging');
@@ -2860,58 +2939,43 @@
     } else {
       pvMouseMode = 'pan';
       pvMouseStart = {
-        x: e.clientX,
-        y: e.clientY,
-        tx: previewState.tx,
-        ty: previewState.ty,
+        x: e.clientX, y: e.clientY,
+        tx: previewState.tx, ty: previewState.ty,
       };
     }
   });
 
   window.addEventListener('mousemove', (e) => {
     if (!previewState.isOpen || !pvMouseMode) return;
-
     if (pvMouseMode === 'logo') {
       const dxScreen = e.clientX - pvMouseStart.x;
       const dyScreen = e.clientY - pvMouseStart.y;
-      const dxRender = dxScreen / pvMouseStart.scale;
-      const dyRender = dyScreen / pvMouseStart.scale;
-      moveLogoTo(pvMouseStart.logoX + dxRender, pvMouseStart.logoY + dyRender);
+      moveLogoTo(pvMouseStart.logoX + dxScreen / pvMouseStart.scale, pvMouseStart.logoY + dyScreen / pvMouseStart.scale);
     } else if (pvMouseMode === 'logo-handle') {
       const rect = previewCanvasWrap.getBoundingClientRect();
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
       const rx = (px - previewState.tx) / previewState.scale;
-      const ry = (py - previewState.ty) / previewState.scale;
-
       const h = pvHandleStart;
       const aspect = state.logoNatural.w / state.logoNatural.h;
       let newX, newY, newW;
-
       if (h.name === 'br') {
-        newX = h.logoX;
-        newY = h.logoY;
-        newW = rx - h.logoX;
+        newX = h.logoX; newY = h.logoY; newW = rx - h.logoX;
       } else if (h.name === 'tl') {
-        const brX = h.logoX + h.logoW;
-        const brY = h.logoY + h.logoH;
+        const brX = h.logoX + h.logoW, brY = h.logoY + h.logoH;
         newW = brX - rx;
         const newH = newW / aspect;
-        newX = brX - newW;
-        newY = brY - newH;
+        newX = brX - newW; newY = brY - newH;
       } else if (h.name === 'tr') {
         const blY = h.logoY + h.logoH;
         newW = rx - h.logoX;
         const newH = newW / aspect;
-        newX = h.logoX;
-        newY = blY - newH;
+        newX = h.logoX; newY = blY - newH;
       } else if (h.name === 'bl') {
         const trX = h.logoX + h.logoW;
         newW = trX - rx;
-        newX = rx;
-        newY = h.logoY;
+        newX = rx; newY = h.logoY;
       }
-
       setLogoSize(newX, newY, newW);
     } else if (pvMouseMode === 'pan') {
       const dx = e.clientX - pvMouseStart.x;
@@ -2929,9 +2993,7 @@
       syncLogoToState();
       if (previewState.logoImg) previewState.logoImg.classList.remove('dragging');
     }
-    pvMouseMode = null;
-    pvMouseStart = null;
-    pvHandleStart = null;
+    pvMouseMode = null; pvMouseStart = null; pvHandleStart = null;
   });
 
   previewCanvasWrap.addEventListener('wheel', (e) => {
@@ -3064,7 +3126,7 @@
         const r = od[i] + dr * amount;
         const g = od[i + 1] + dg * amount;
         const b = od[i + 2] + db * amount;
-        od[i]     = r < 0 ? 0 : r > 255 ? 255 : r;
+        od[i] = r < 0 ? 0 : r > 255 ? 255 : r;
         od[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
         od[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
       }
@@ -3206,7 +3268,10 @@
   });
 
   updateFilenameUI();
-  tryAutoLoadLogo();
+
+  /* ============ Start logo load IMMEDIATELY ============ */
+  // Preload in <head> already started fetching — this will hit cache instantly.
+  initLogoLoad();
 })();
 </script>
 </body>
