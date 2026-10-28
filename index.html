@@ -766,19 +766,20 @@
     to { opacity: 1; }
   }
 
-  /* ==== Top toolbar (fixed header, no longer floating over image) ==== */
   .preview-toolbar {
-    position: relative;
-    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
-    background: #12161e;
-    border-bottom: 1px solid rgba(255,255,255,0.14);
+    background: linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0));
     z-index: 20;
     color: white;
+    pointer-events: none;
     flex-wrap: wrap;
   }
 
@@ -787,7 +788,7 @@
   .preview-info {
     font-size: 11px;
     font-weight: 600;
-    background: rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.55);
     padding: 8px 11px;
     border-radius: 8px;
     direction: ltr;
@@ -821,6 +822,8 @@
     font-family: inherit;
     transition: background 0.15s, transform 0.1s;
     padding: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     flex-shrink: 0;
   }
 
@@ -840,7 +843,7 @@
     min-width: 58px;
     text-align: center;
     direction: ltr;
-    background: rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.55);
     padding: 12px 6px;
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.15);
@@ -857,7 +860,6 @@
     user-select: none;
     -webkit-user-select: none;
     background: #16191f;
-    min-height: 0;
   }
 
   .preview-canvas-wrap:active { cursor: grabbing; }
@@ -951,19 +953,24 @@
     background: #4a9eff;
   }
 
-  /* ===== Preview size bar (bottom footer, not floating over image) ===== */
+  /* ===== Preview size slider (inside preview) ===== */
   .preview-size-panel {
-    position: relative;
-    flex-shrink: 0;
-    background: #12161e;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    position: absolute;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 12px;
+    right: 12px;
+    background: rgba(18, 22, 30, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 14px;
     z-index: 15;
     color: white;
-    border-top: 1px solid rgba(255,255,255,0.14);
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.55);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     pointer-events: auto;
     animation: sizePanelIn 0.28s ease-out;
   }
@@ -1069,7 +1076,7 @@
 
   .preview-hint {
     position: absolute;
-    bottom: 18px;
+    bottom: calc(105px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0,0,0,0.7);
@@ -1300,7 +1307,7 @@
   </div>
   <div class="preview-canvas-wrap" id="previewCanvasWrap"></div>
 
-  <!-- Preview size panel (now a fixed bottom footer) -->
+  <!-- Preview size panel -->
   <div class="preview-size-panel" id="previewSizePanel">
     <div class="panel-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1427,7 +1434,7 @@
     logoY: 0,
     logoW: 0,
     logoH: 0,
-    sliderDragging: false,
+    sliderDragging: false, // to detect if slider is being dragged
   };
 
   let toastTimer;
@@ -1649,6 +1656,7 @@
     updateSliderFill();
     applyTransforms();
 
+    // Sync to preview if open
     if (previewState.isOpen) {
       resizeLogoInPreview(pct);
       previewSizeSlider.value = pct;
@@ -1679,14 +1687,17 @@
   function resizeLogoInPreview(pct) {
     if (!previewState.isOpen || previewState.renderW === 0) return;
 
+    // Save center point
     const cx = previewState.logoX + previewState.logoW / 2;
     const cy = previewState.logoY + previewState.logoH / 2;
 
+    // Compute new size
     const newW = previewState.renderW * (pct / 100);
     const newH = newW * (state.logoNatural.h / state.logoNatural.w);
     const newX = cx - newW / 2;
     const newY = cy - newH / 2;
 
+    // Clamp position
     const maxX = Math.max(0, previewState.renderW - newW);
     const maxY = Math.max(0, previewState.renderH - newH);
     previewState.logoX = Math.max(0, Math.min(newX, maxX));
@@ -1715,6 +1726,7 @@
       resizeLogoInPreview(pct);
     }
 
+    // Sync to main editor
     sizeSlider.value = pct;
     sizeValue.textContent = pct + '%';
     updateSliderFill();
@@ -2042,6 +2054,7 @@
     previewState.logoW = logoWRender;
     previewState.logoH = logoHRender;
 
+    // Sync slider UI
     previewSizeSlider.value = state.logoScalePct;
     previewSizeValue.textContent = state.logoScalePct + '%';
     updatePreviewSizeFill();
@@ -2193,9 +2206,11 @@
 
     updatePreviewHandles();
 
+    // Update state based on actual rendered size
     const pct = Math.round((newW / previewState.renderW) * 100);
     state.logoScalePct = Math.max(5, Math.min(200, pct));
 
+    // Sync sliders
     previewSizeSlider.value = state.logoScalePct;
     previewSizeValue.textContent = state.logoScalePct + '%';
     updatePreviewSizeFill();
