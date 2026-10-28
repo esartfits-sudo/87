@@ -860,6 +860,7 @@
     user-select: none;
     -webkit-user-select: none;
     background: #16191f;
+    min-height: 0;
   }
 
   .preview-canvas-wrap:active { cursor: grabbing; }
@@ -953,31 +954,19 @@
     background: #4a9eff;
   }
 
-  /* ===== Preview size slider (inside preview) ===== */
+  /* ===== Preview size panel (now docked below the canvas, not floating) ===== */
   .preview-size-panel {
-    position: absolute;
-    bottom: calc(12px + env(safe-area-inset-bottom));
-    left: 12px;
-    right: 12px;
-    background: rgba(18, 22, 30, 0.94);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 18px;
-    padding: 12px 16px;
+    background: #12161e;
+    border-top: 1px solid rgba(255,255,255,0.14);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
     display: flex;
     align-items: center;
     gap: 14px;
     z-index: 15;
     color: white;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    flex-shrink: 0;
     pointer-events: auto;
-    animation: sizePanelIn 0.28s ease-out;
-  }
-
-  @keyframes sizePanelIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.5);
   }
 
   .preview-size-panel .panel-icon {
@@ -1076,7 +1065,7 @@
 
   .preview-hint {
     position: absolute;
-    bottom: calc(105px + env(safe-area-inset-bottom));
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0,0,0,0.7);
@@ -1307,7 +1296,7 @@
   </div>
   <div class="preview-canvas-wrap" id="previewCanvasWrap"></div>
 
-  <!-- Preview size panel -->
+  <!-- Preview size panel: now docked BELOW the canvas, not floating -->
   <div class="preview-size-panel" id="previewSizePanel">
     <div class="panel-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1434,7 +1423,7 @@
     logoY: 0,
     logoW: 0,
     logoH: 0,
-    sliderDragging: false, // to detect if slider is being dragged
+    sliderDragging: false,
   };
 
   let toastTimer;
